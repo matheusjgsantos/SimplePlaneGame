@@ -69,13 +69,13 @@ start:
     
 mainLoop:
         call reset_tabela_nomes
-        ;call desenha_borda; chama  rotina de desenho da borda	
+        call desenha_borda; chama  rotina de desenho da borda	
         ;call desenha_pista
-        call inicia_attributos_aviao
-        call mostra_aviao
-        call mostra_nuvens
-        ;call mostra_sol
-        call movimenta_loop
+        ;call inicia_attributos_aviao
+        ;call mostra_aviao
+        ;call mostra_nuvens
+        call mostra_sol
+        ;call movimenta_loop
         ;call CHGET
         ret
             
@@ -168,22 +168,22 @@ mostra_aviao_descendo:
 
 
 mostra_aviao_subindo:
-	ld hl,aviao3a_pattern; Carrega em HL o endereço do padrao do 
-            					; sprite do avião
-	ld bc,32			; Carrega em B a quantidade de blocos a
-            					; serem enviados pra VRAM
+	ld hl,aviao3a_pattern	; Carrega em HL o endereço do padrao do 
+				; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+				; serem enviados pra VRAM
 	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
-            					; para a tabela de sprites (0x3800)
-	call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM
-	ld hl,aviao3b_pattern; Carrega em HL o endereço do padrao do 
-            					; sprite do avião
-	ld bc,32			; Carrega em B a quantidade de blocos a
-            					; serem enviados pra VRAM
+				; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+				; para o endereço DE da VRAM
+	ld hl,aviao3b_pattern	; Carrega em HL o endereço do padrao do 
+				; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+				; serem enviados pra VRAM
 	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
-            					; para a tabela de sprites (0x3800)
-	call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM
+				; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+				; para o endereço DE da VRAM
 	ld a,(status_aviao)
 	ld a,1
 	ld (status_aviao),a
@@ -205,90 +205,92 @@ mostra_nuvens:
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-            ld de,SPR_ATT+8		; Carrega em DE a posicao iniciao da VRAM
+	ld de,SPR_ATT+8		; Carrega em DE a posicao iniciao da VRAM
             					; para a tabela de padroes + offset de 4 
                                 ; bytes para o sprite 1
-            call LDIRVM			; Transfere BC blocos da posicao HL da RAM
+	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
             					; para posicao DE da VRAM
-            ld hl,nuvem02_pattern ; Carrega o endereço do padrao da 
+	ld hl,nuvem02_pattern ; Carrega o endereço do padrao da 
             					; nuvem01 em HL
-            ld bc,32			; Numero de blocos a serem copiados pra VRAM
-            ld de,SPR_PAT+96	; Coloca em DE a posicao inicial da tabela
+	ld bc,32			; Numero de blocos a serem copiados pra VRAM
+	ld de,SPR_PAT+96	; Coloca em DE a posicao inicial da tabela
             					; de sprites da VRAM + um offset de 64 bytes
                                 ; para copia dos dados do sprite 2
-            call LDIRVM			; Transfere BC blocos da posicao HL da RAM
+	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
             					; para posicao DE da VRAM
-            ld hl,nuvem02_attrib ; Carrega o endereço do attributo da 
+	ld hl,nuvem02_attrib ; Carrega o endereço do attributo da 
             					; nuvem01 em HL
-            ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
+	ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
             					; Byte 0: Coordenada vertical
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-            ld de,SPR_ATT+12	; Carrega em DE a posicao iniciao da VRAM
+	ld de,SPR_ATT+12	; Carrega em DE a posicao iniciao da VRAM
             					; para a tabela de padroes + offset de 8 
                                 ; bytes para o sprite 2
-            call LDIRVM			; Transfere BC blocos da posicao HL da RAM
+	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
             					; para posicao DE da VRAM
-            ret					; retorna para a origem da chamada
+	ret					; retorna para a origem da chamada
             
 mostra_sol:
-            ld hl,sol01a_pattern; Coloca o endereço do tile em HL
-            ld bc,16		; Coloca em BC a quantidade de bytes do tile
-            ;ld de,$1010		; Coloca em DE endereço da VRAM da posicao
-            ld de,$0080
-            			; y = 01 e x = e0 (224). Cada tile possui
-                                ; 8 x 8 pixels e sao gravados na area de
-                                ; nomes na VRAM entre $0000 e #2000 (8192)
+        ld hl,sol01a_pattern; Coloca o endereço do tile em HL
+        ld bc,16		; Coloca em BC a quantidade de bytes do tile
+        ;ld de,$1010		; Coloca em DE endereço da VRAM da posicao
+        ld de,$0080
                                 ; para aparecem na área visivel da tela
-            call LDIRVM		; Envia os 16 blocos do tile pra VRAM
-            ld a,$b7		; Carrega em a o valor das cores:
+	call LDIRVM		; Envia os 16 blocos do tile pra VRAM
+	ld a,$b7		; Carrega em a o valor das cores:
             			; b=amarelo (11) para bits 1 do tile e
                                 ; 7=ciano para os bits 0 do tile que estiver
                                 ; ocupando o endereço correspondente na 
                                 ; VRAM
-            ld bc,16		; carrega a quantidade de blocos em BC
-            ld hl,$21e0		; carrega em hl o destino na VRAM para 
-            			; preencher com as cores definidas em A
-                                ; Cada byte no endereço $2000 adiante é 
-                                ; referente a uma linha do tile alocado em 
-                                ; $0000, entao como colocamos 16 bytes no
-                                ; inicio da VRAM usando o sol01a_pattern
+	ld bc,16		; carrega a quantidade de blocos em BC
+	ld hl,$2080		; 
                                 ; tambem precisamos colorir os 16 bytes
-            call FILVRM		; Preenche na VRAM entre $2000 e $2015
+	call FILVRM		; Preenche na VRAM entre $2000 e $2015
             			; com os valores de cores $b7 (amarelo para
                                 ; bits 1, ciano para bits 0)
             
-            ld hl,sol01b_pattern; Fazemos o mesmo agora com os blocos
-            					; referentes a parte inferior do sol
-                                ; preenchendo na proxima "linha" referente
-                                ; a Y com 8x16 tiles
-            ld bc,16			; 16 bytes a serem copiados
-            ld de,$02e0         ; BC agora aponta para Y=$02 e X=$e0 (224)
-            call LDIRVM			; carrega a parte inferior do sol na VRAM
+	ld hl,sol01b_pattern	;
+	ld bc,16		; 16 bytes a serem copiados
+	ld de,$0080+16		; BC agora aponta para Y=$02 e X=$e0 (224)
+	call LDIRVM		; carrega a parte inferior do sol na VRAM
            
-            ld a,$b7			; Define a cor da mesma forma que feito
-            					; para a parte superior do sol
-            ld bc,16			; Bloco de 16 bytes
-            ld hl,$22e0			; Preenche a VRAM com o valor $b7
-            					; para colorir o tile carregado em $02e0
+	ld a,$b7		; Define a cor da mesma forma que feito
+				; para a parte superior do sol
+	ld bc,16		; Bloco de 16 bytes
+	ld hl,$2080+16		; Preenche a VRAM com o valor $b7
+				; para colorir o tile carregado em $02e0
                                 ; + $2000 (amarelo e ciano)
-            call FILVRM			; Preencher 16 blocos da VRAM com$ b7
-            ret					; Volta pra origem
+	call FILVRM		; Preencher 16 blocos da VRAM com$ b7
+        
+        ld hl,mapa_sol_01	; carrega em HL o mapa de nome da parte superior 
+        			; do sol
+        ld de,$185b		; correpondente ao bloco 91 da tela
+        ld bc,2			; vamos copiar 2 blocos referentes ao tile
+        call LDIRVM		; chama a rotina de copia para VRAM
+        
+        ld hl,mapa_sol_02	; carrega em HL o mapa de nome da parte superior 
+        			; do sol
+        ld de,$187b		; correpondente a0 bloco 123 da tela
+        ld bc,2
+        call LDIRVM
+        
+	ret			; Volta pra origem
 
-movimenta_loop:					; Esse é o loop que cuida da movimentação
-								; de todos os sprites
-            ld a,0				; 0 = Teclas de cursor
-            call checa_cursor	; rotina para checar as teclas de cursor
-            ld a,1				; 1 = Joystick na porta 1
-            call checa_cursor	; rotina para checar as teclas de cursor
-            call movimenta_aviao; Rotina da movimentacao do aviao
-            call movimenta_nuvem; Rotina da movimentacao das nuvens
-            ;call desenha_pista
-            ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
-            					; tudo se move muito rapido
-            call espera_nuvem	; Rotina de delay
-            jp movimenta_loop	; retorna pro inicio do loop
+movimenta_loop:			; Esse é o loop que cuida da movimentação
+				; de todos os sprites
+	ld a,0		; 0 = Teclas de cursor
+	call checa_cursor	; rotina para checar as teclas de cursor
+	ld a,1		; 1 = Joystick na porta 1
+	call checa_cursor	; rotina para checar as teclas de cursor
+	call movimenta_aviao; Rotina da movimentacao do aviao
+	call movimenta_nuvem; Rotina da movimentacao das nuvens
+	;call desenha_pista
+	ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
+				; tudo se move muito rapido
+	call espera_nuvem	; Rotina de delay
+	jp movimenta_loop	; retorna pro inicio do loop
            			            
 movimenta_aviao:
 
@@ -315,24 +317,24 @@ movimenta_aviao:
             	;ld (.aviaoH),A		; Coloca o valor de A em .aviaoH
             
 		ld hl,SPR_ATT
-            	ld a,(.aviaoV)
-            	call WRTVRM
+		ld a,(.aviaoV)
+		call WRTVRM
+
+		ld hl,SPR_ATT+1	; Coloca em HL a posicao da tabela de 	
+            			; atributo de sprite + 1, que define a 
+            			; movimentacao horizontal do sprite 0
+		ld a,(.aviaoH)	; carrega o valor definido em .aviaoH em A
+		call WRTVRM		; Coloca na posical HL da VRAM o valor de A
+
+		ld hl,SPR_ATT+4
+		ld a,(.aviaoV)
+		call WRTVRM
+
+		ld hl,SPR_ATT+5
+		ld a,(.aviaoH)
+		call WRTVRM
             
-            	ld hl,SPR_ATT+1		; Coloca em HL a posicao da tabela de 	
-            					; atributo de sprite + 1, que define a 
-                                ; movimentacao horizontal do sprite 0
-            	ld a,(.aviaoH)		; carrega o valor definido em .aviaoH em A
-            	call WRTVRM			; Coloca na posical HL da VRAM o valor de A
-            
-            	ld hl,SPR_ATT+4
-            	ld a,(.aviaoV)
-            	call WRTVRM
-                     
-            	ld hl,SPR_ATT+5
-            	ld a,(.aviaoH)
-            	call WRTVRM
-            
-            	;ld a,(status_aviao)
+		;ld a,(status_aviao)
             	;ld a,0
             
             	ret					; retorna pra origem da chamada
@@ -418,8 +420,7 @@ cursor_esquerda:
         ld a,(status_aviao)
         cp 255
         call nz, mostra_aviao_subindo        
-        pop af	
-        ;call CHGET; retorna AF da pilha
+        pop af		; retorna AF da pilha
         ret							; retorna para origem da chamada
         
 
@@ -551,50 +552,50 @@ desenha_borda:
         ld de,$0040		; slot 6 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
             
-        ld hl,frame_supesq_02b ; Esse é a segunda parte do desenho da
-        ld bc,8		; borda. Vamos carregar novamente dois blocos
+	ld hl,frame_supesq_02b ; Esse é a segunda parte do desenho da
+        ld bc,8			; borda. Vamos carregar novamente dois blocos
             				; de 8x8 e colocar na posicao
         ld de,$1040		; slot 6 da tabela de padroes do 2o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
             
         ld hl,frame_supdir_02a; carrega a primeira parte da borda
-            				; superior direita
-        ld bc,8		; 2 blocos de 8x8
+            			; superior direita
+        ld bc,8			; 2 blocos de 8x8
         ld de,$0048		; slot 7 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; envia pra VRAM
             
-        ld hl,frame_supdir_02a; carrega a primeira parte da borda
-            				; superior direita
-        ld bc,8		; 2 blocos de 8x8
+        ld hl,frame_supdir_02a	; carrega a primeira parte da borda
+            			; superior direita
+        ld bc,8			; 2 blocos de 8x8
         ld de,$1048		; slot 7 da tabela de padroes do 2o 1/3 da tela
         call LDIRVM		; envia pra VRAM
             
-        ld hl, frame_supdir_02b; carrega a segunda parte da borda
-            				; superior direita
+        ld hl, frame_supdir_02b	; carrega a segunda parte da borda
+            			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$0050		; slot 8 da tabela de padroes do 1o 1/3 da tela 
         call LDIRVM		; envia para VRAM
             
-        ld hl, frame_supdir_02b; carrega a segunda parte da borda
-            				; superior direita
+        ld hl, frame_supdir_02b	; carrega a segunda parte da borda
+            			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$1050		; slot 8 da tabela de padroes do 2o 1/3 da tela 
         call LDIRVM		; envia para VRAM
             
         ld hl,mapa_borda_superior ; Mapeia na tela a posicao de cada
-            				; tile nas duas linhas superiores da tela
+            			; tile nas duas linhas superiores da tela
 	ld bc,64		; 32 blocos de tiles por linha = 2 linhas
 	ld de,$1800		; Endereco na VRAM referente a tabela de nomes
-                                        ; do 1o 1/3 da tela
+                                ; do 1o 1/3 da tela
 	call LDIRVM		; envia para VRAM
 
-        ld hl,frame_infesq_01a; carrega o padrao do desenho da borda
-        ; inferior esquerda. Vamos carregar 1 bloco
+        ld hl,frame_infesq_01a	; carrega o padrao do desenho da borda
+        			; inferior esquerda. Vamos carregar 1 bloco
         ld bc,8			; de 8x8 e colocar na VRAM na posicao do
         ld de,$1058		; Slot 9 da tabela de padroes do 3o 1/3 da tela
         call LDIRVM		; Envia dos dados pra VRAM
 
-        ld hl,frame_infesq_01b ; Esse é a segunda parte do desenho da
+        ld hl,frame_infesq_01b 	; Esse é a segunda parte do desenho da
         ld bc,8			; borda. Vamos carregar um bloco de 8x8 no
         ld de,$1060		; slot 10 da tabela de padroes do 3o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
@@ -609,47 +610,47 @@ desenha_borda:
         ld de,$1070		; slot 12 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
 
-        ld hl,frame_infdir_01a; carrega a primeira parte da borda
-        ; superior direita
+        ld hl,frame_infdir_01a	; carrega a primeira parte da borda
+        			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$1078		; slot 13 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; envia pra VRAM
 
-        ld hl, frame_infdir_01b; carrega a segunda parte da borda
-        ; superior direita
+        ld hl, frame_infdir_01b	; carrega a segunda parte da borda
+        			; superior direita
         ld bc,8			; 1 blocos de 8x8
         ld de,$1080		; slot 14 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; envia para VRAM
 
-        ld hl,frame_infesq_02a; carrega o padrao do desenho da borda
-        ; superior esquerda. Vamos carregar 2 blocos
+        ld hl,frame_infesq_02a	; carrega o padrao do desenho da borda
+        			; superior esquerda. Vamos carregar 2 blocos
         ld bc,8			; de 8x8 e colocar na posição
         ld de,$1088		; slot 5 da tabela de padroes do 3o 1/3 da tela
         call LDIRVM		; Envia dos dados pra VRAM
 
-        ld hl,frame_infesq_02b ; Esse é a segunda parte do desenho da
-        ld bc,8		; borda. Vamos carregar novamente dois blocos
-        ; de 8x8 e colocar na posicao
+        ld hl,frame_infesq_02b 	; Esse é a segunda parte do desenho da
+        ld bc,8			; borda. Vamos carregar novamente dois blocos
+				; de 8x8 e colocar na posicao
         ld de,$1090		; slot 6 da tabela de padroes do 3o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
 
         ld hl,frame_infdir_02a; carrega a primeira parte da borda
-        ; superior direita
-        ld bc,8		; 2 blocos de 8x8
+        			; superior direita
+        ld bc,8			; 2 blocos de 8x8
         ld de,$1098		; slot 7 da tabela de padroes do 3o 1/3 da tela
         call LDIRVM		; envia pra VRAM
 
-        ld hl, frame_infdir_02b; carrega a segunda parte da borda
-        ; superior direita
+        ld hl, frame_infdir_02b	; carrega a segunda parte da borda
+        			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$10a0		; slot 8 da tabela de padroes do 3o 1/3 da tela 
         call LDIRVM		; envia para VRAM
 
         ld hl,mapa_borda_inferior ; Mapeia na tela a posicao de cada
-        ; tile nas duas linhas superiores da tela
+        			; tile nas duas linhas superiores da tela
         ld bc,64		; 32 blocos de tiles por linha = 2 linhas
         ld de,$1a00		; Endereco na VRAM referente a tabela de nomes
-        ; do 3o 1/3 da tela
+        			; do 3o 1/3 da tela
         call LDIRVM		; envia para VRAM
 
         ld hl,frame_esquerdo_01
@@ -682,17 +683,17 @@ desenha_borda:
 
         ; Segunda seçao da tela  
         ld hl,mapa_borda_superior ; Mapeia na tela a posicao de cada
-        ; tile nas duas linhas superiores da tela
+        			; tile nas duas linhas superiores da tela
         ld bc,64		; 32 blocos de tiles por linha = 2 linhas
-        ld de,$1a00+64	; Endereco na VRAM referente a tabela de nomes
-        ; do 1o 1/3 da tela
+        ld de,$1a00+64		; Endereco na VRAM referente a tabela de nomes
+        			; do 1o 1/3 da tela
         call LDIRVM		; envia para VRAM
 
         ld hl,mapa_borda_inferior ; Mapeia na tela a posicao de cada
-        ; tile nas duas linhas superiores da tela
+        			; tile nas duas linhas superiores da tela
         ld bc,64		; 32 blocos de tiles por linha = 2 linhas
-        ld de,$1aff-63	; Endereco na VRAM referente a tabela de nomes
-        ; do 1o 1/3 da tela
+        ld de,$1aff-63		; Endereco na VRAM referente a tabela de nomes
+        			; do 1o 1/3 da tela
         call LDIRVM		; envia para VRAM  
 
         ld hl,frame_esquerdo_01
@@ -710,7 +711,7 @@ desenha_borda:
         ld hl,$1a00+128
         ld (.posicao),hl
         ld hl,mapa_laterais_secao2
-        ld (.preenche),hl ; Aponta preenche para mapa_laterais_secao2 <- MUITO IMPORTANTE
+        ld (.preenche),hl 	; Aponta preenche para mapa_laterais_secao2 <- MUITO IMPORTANTE
         call desenha_laterais_secao
 
         ret
@@ -729,42 +730,40 @@ desenha_laterais_secao:
         djnz desenha_laterais_secao
         ret
 
-
-
 desenha_pista:
 	ld hl,$0110
         call POSIT
-            ld a,(pista_scroll)
-			;call GRPPRT
-            cp 0
-            jp z,desenha_pista_01
+	ld a,(pista_scroll)
+	;call GRPPRT
+	cp 0
+	jp z,desenha_pista_01
 
-            cp 1
-            jp z,desenha_pista_02
+	cp 1
+	jp z,desenha_pista_02
             
-            cp 2
-            jp z,desenha_pista_03
+	cp 2
+	jp z,desenha_pista_03
             
-            cp 3
-            jp z,desenha_pista_04
+	cp 3
+	jp z,desenha_pista_04
             
-            cp 4
-            jp z,desenha_pista_05
+	cp 4
+	jp z,desenha_pista_05
             
-            cp 5
-            jp z,desenha_pista_06
+	cp 5
+	jp z,desenha_pista_06
             
-            cp 6
-            jp z,desenha_pista_07
+	cp 6
+	jp z,desenha_pista_07
             
-            cp 7
-            jp z,desenha_pista_08            
+	cp 7
+	jp z,desenha_pista_08            
             
-            cp 8
-            jp z,reset_desenha_pista
+	cp 8
+	jp z,reset_desenha_pista
             
-            call CHGET
-            ret
+	;call CHGET
+	ret
 
             
 desenha_pista_01: 
@@ -1187,60 +1186,59 @@ espera_loop
 
 ; Sprites gerados usando o TinySprite: http://msx.jannone.org/tinysprite/tinysprite.html
 aviao1a_pattern:
-            db $00,$00,$00,$00,$E0,$B1,$96,$9C
-            db $82,$44,$39,$13,$0E,$00,$00,$00
-            db $00,$00,$00,$00,$78,$94,$12,$09
-	    db $47,$82,$FC,$00,$00,$00,$00,$00
+        db $00,$00,$00,$00,$E0,$B1,$96,$9C
+        db $82,$44,$39,$13,$0E,$00,$00,$00
+        db $00,$00,$00,$00,$78,$94,$12,$09
+        db $47,$82,$FC,$00,$00,$00,$00,$00
 
 aviao1b_pattern:
-            DB $00,$00,$00,$00,$00,$40,$61,$63
-            DB $7D,$3B,$06,$0C,$00,$00,$00,$00
-            DB $00,$00,$00,$00,$00,$68,$EC,$F6
-            DB $B8,$7C,$00,$00,$00,$00,$00,$00
+        DB $00,$00,$00,$00,$00,$40,$61,$63
+        DB $7D,$3B,$06,$0C,$00,$00,$00,$00
+        DB $00,$00,$00,$00,$00,$68,$EC,$F6
+        DB $B8,$7C,$00,$00,$00,$00,$00,$00
 
 aviao2a_pattern:
-            DB $00,$0E,$1A,$32,$24,$22,$11,$08
-            DB $3F,$40,$60,$1F,$00,$00,$00,$00
-            DB $00,$00,$00,$00,$00,$00,$E0,$78
-            DB $0C,$12,$12,$D2,$8A,$64,$18,$00
+        DB $00,$0E,$1A,$32,$24,$22,$11,$08
+        DB $3F,$40,$60,$1F,$00,$00,$00,$00
+        DB $00,$00,$00,$00,$00,$00,$E0,$78
+        DB $0C,$12,$12,$D2,$8A,$64,$18,$00
 
 aviao2b_pattern:
-            DB $00,$00,$04,$0C,$18,$1C,$0E,$07
-            DB $00,$3F,$1F,$00,$00,$00,$00,$00
-            DB $00,$00,$00,$00,$00,$00,$00,$80
-            DB $F0,$EC,$EC,$2C,$74,$18,$00,$00
+        DB $00,$00,$04,$0C,$18,$1C,$0E,$07
+        DB $00,$3F,$1F,$00,$00,$00,$00,$00
+        DB $00,$00,$00,$00,$00,$00,$00,$80
+        DB $F0,$EC,$EC,$2C,$74,$18,$00,$00
 
 aviao3a_pattern:
-            DB $00,$00,$00,$00,$01,$01,$03,$02
-            DB $02,$74,$48,$61,$32,$1C,$00,$00
-            DB $00,$78,$84,$8A,$72,$04,$14,$18
-            DB $90,$90,$90,$90,$90,$A0,$60,$00
+        DB $00,$00,$00,$00,$01,$01,$03,$02
+        DB $02,$74,$48,$61,$32,$1C,$00,$00
+        DB $00,$78,$84,$8A,$72,$04,$14,$18
+        DB $90,$90,$90,$90,$90,$A0,$60,$00
 
 aviao3b_pattern:
-            DB $00,$00,$00,$00,$00,$00,$00,$01
-            DB $01,$03,$37,$1E,$0C,$00,$00,$00
-            DB $00,$00,$78,$74,$8C,$F8,$E8,$E0
-            DB $60,$60,$60,$60,$60,$40,$00,$00
+	DB $00,$00,$00,$00,$00,$00,$00,$01
+        DB $01,$03,$37,$1E,$0C,$00,$00,$00
+        DB $00,$00,$78,$74,$8C,$F8,$E8,$E0
+        DB $60,$60,$60,$60,$60,$40,$00,$00
+
+mapa_sol_01:
+	db 16,17
+mapa_sol_02:	
+	db 18,19
             
 mapa_borda_superior:
-            DB 1,2,3,4,3,4,3,4,3,4,3,4,3,4,3,4
-            DB 3,4,3,4,3,4,3,4,3,4,3,4,3,4,5,6
-            DB 7,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-            DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,10   
+            DB 1,2,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,5,6
+            DB 7,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,10   
 
 mapa_borda_inferior:
-            DB 11,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-            DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,16 
-            DB 17,18,13,14,13,14,13,14,13,14,13,14,13,14,13,14
-            DB 13,14,13,14,13,14,13,14,13,14,13,14,13,14,19,20
+            DB 11,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,16 
+            DB 17,18,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,19,20
 
 mapa_laterais_secao1:
-            DB 14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-            DB 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15
+            DB 14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15
             
 mapa_laterais_secao2:
-            DB 21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-            db 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22
+            DB 21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22
             
 
 nuvem01_pattern:
