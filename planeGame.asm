@@ -7,24 +7,24 @@ FORCLR:		equ 0xF3E9	; Variavel de systema referente a cor da fonte
 BAKCLR:		equ 0xF3EA	; Variavel de systema referente a cor do fundo
 BDRCLR:		equ 0xF3EB	; Variavel de systema referente a cor da borda
 CLIKSW: 	equ 0xF3DB 	; Variavel de systema referente ao click do teclado
-WRTVRM: 	equ 0x004D  ; Grava o valor em A na posiçao HL da VRAM
-RG0SAV:		equ 0xF3DF  ; Obtem o valor atual do registrador 0 do VDP
+WRTVRM: 	equ 0x004D  	; Grava o valor em A na posiçao HL da VRAM
+RG0SAV:		equ 0xF3DF  	; Obtem o valor atual do registrador 0 do VDP
 RG1SAV:		equ 0xF3E0	; Obtem o valor atual do registrador 1 do VDP
 WRTVDP:		equ 0x0047	; Envia para o VDP o valor de B no reg C
 SPR_PAT:	equ 0x3800	; Endereço da VRAM da tabela de padroes de sprite
 SPR_ATT:	equ 0x1b00	; Endereço da VRAM da tabela de atributos de sprite
 GTSTCK: 	equ 0x00D5	; Retorna status do joystick
-						; Entrada: A  - numero do joystick
-                        ; 0 = cursors, 
-                        ; 1 = joystick na porta 1
-                        ; 2 = joystick na porta 2
-						;Saida: A  - Direcao
+				; Entrada: A  - numero do joystick
+                        	; 0 = cursors, 
+                        	; 1 = joystick na porta 1
+                        	; 2 = joystick na porta 2
+				; Saida: A  - Direcao
 GRPPRT: 	equ 0x008D	; Escreve um caractere na tela grafica
 POSIT:		equ 0x00C6	; Move o cursor para um posicao definida por HL
-						; H  - Coordenada Y cursor
-           				; L  - Coordenada X cursor
+				; H  - Coordenada Y cursor
+           			; L  - Coordenada X cursor
 FILVRM:		equ 0x0056	; Preenche BC blocos no endereço HL da VRAM
-						; com os dados definidos em A
+				; com os dados definidos em A
 CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
 
         org 0x4000
@@ -42,35 +42,35 @@ CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
 ; initialize and print message
 start:
 	ld hl,FORCLR	; Carrega em HL o endereço da variavel FORCLR
-        ld (hl),1		; Define o valor 1 (preto) na variavel FORCLR
+        ld (hl),1	; Define o valor 1 (preto) na variavel FORCLR
         ld hl,BAKCLR	; Carrega em HL o endereço da variavel BAKCLR
-        ld (hl),7		; Define o valor 7 (ciano) na variavel BAKCLT
+        ld (hl),7	; Define o valor 7 (ciano) na variavel BAKCLT
         ld hl,BDRCLR	; Carrega em HL o endereço da variavel BDRCLR
-        ld (hl),4		; Define o valor 1 (preto) na variavel BDRCLR
+        ld (hl),4	; Define o valor 1 (preto) na variavel BDRCLR
         ld a,(RG1SAV)	; Carrega em A o valor atual do registrador 1 
-            				; do VDP
-        and $FC			; Altera valor de A para xxxxxx00 
-            				; (x=sem mudança)
-        or $02			; Altera valor de A para xxxxxx10
+            		; do VDP
+        and $FC		; Altera valor de A para xxxxxx00 
+            		; (x=sem mudança)
+        or $02		; Altera valor de A para xxxxxx10
         call AtualizaVDP; Vamos enviar o valor atual dos 6 primeiros 
-            				; bits do REG1SAV + 10 para o registrador 1
-                            ; do VPD, o que altera o modo do sprite de 
-                            ; 8x8 para 16x16
-                            ; Fonte: https://github.com/gseidler/The-MSX-Red-Book/blob/master/the_msx_red_book.md#mode_register_1
+            		; bits do REG1SAV + 10 para o registrador 1
+                        ; do VPD, o que altera o modo do sprite de 
+                        ; 8x8 para 16x16
+                        ; Fonte: https://github.com/gseidler/The-MSX-Red-Book/blob/master/the_msx_red_book.md#mode_register_1
             
-        ld a,2			; Coloca 2 em a para chamar CHGMOD
-        call CHGMOD		; e trocar o modo de tela para screen 2
+        ld a,2		; Coloca 2 em a para chamar CHGMOD
+        call CHGMOD	; e trocar o modo de tela para screen 2
         ld hl,CLIKSW	; Carrega a variavel de sistema do som de click
-        ld (hl),$00		; e altera o valor para $00 (desligado)
-        call CHGSND		; Desliga o som de click das teclas
+        ld (hl),$00	; e altera o valor para $00 (desligado)
+        call CHGSND	; Desliga o som de click das teclas
         ld hl,$10
         ld (.aviaoH),hl
         ld (.aviaoV),hl
     
 mainLoop:
         call reset_tabela_nomes
-        call desenha_borda; chama  rotina de desenho da borda	
-        ;call desenha_pista	;
+        ;call desenha_borda; chama  rotina de desenho da borda	
+        ;call desenha_pista
         call inicia_attributos_aviao
         call mostra_aviao
         call mostra_nuvens
@@ -79,16 +79,17 @@ mainLoop:
         ;call CHGET
         ret
             
-AtualizaVDP:				; Toda atualização do VDP exige que as 
+AtualizaVDP:				
+	; Toda atualização do VDP exige que as 
         ; interrupçoes sejam desabilitadas pois
         ; qualquer mudança de outros registradores
         ; afeta o resultado
-        di				; Desabilita as interrupçoes 
-        ld b, a			; Coloca em B o valor a ser escrito no 
-        ; registrador do VDP
-        ld c, $01		; Coloca em C o valor do registrador alvo
-        call WRTVDP		; Envia para o registrador C os dados em B
-        ei				; HAbilita novamente as interrupções
+        di		; Desabilita as interrupçoes 
+        ld b, a		; Coloca em B o valor a ser escrito no 
+        		; registrador do VDP
+        ld c, $01	; Coloca em C o valor do registrador alvo
+        call WRTVDP	; Envia para o registrador C os dados em B
+        ei		; Habilita novamente as interrupções
         ret
 
 reset_tabela_nomes:
@@ -99,107 +100,107 @@ reset_tabela_nomes:
         ret
 
 mostra_aviao:
-        ld hl,aviao1a_pattern; Carrega em HL o endereço do padrao do 
-        ; sprite do avião
-        ld bc,32			; Carrega em B a quantidade de blocos a
-        ; serem enviados pra VRAM
+        ld hl,aviao1a_pattern	; Carrega em HL o endereço do padrao do 
+        			; sprite do avião
+        ld bc,32		; Carrega em B a quantidade de blocos a
+        			; serem enviados pra VRAM
         ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
-        ; para a tabela de sprites (0x3800)
-        call LDIRVM			; Envia B blocos do endereço HL da RAM
-        ; para o endereço DE da VRAM
-        ld hl,aviao1b_pattern; Carrega em HL o endereço do padrao do 
-        ; sprite do avião
-        ld bc,32			; Carrega em B a quantidade de blocos a
-        ; serem enviados pra VRAM
+        			; para a tabela de sprites (0x3800)
+        call LDIRVM		; Envia B blocos do endereço HL da RAM
+        			; para o endereço DE da VRAM
+        ld hl,aviao1b_pattern	; Carrega em HL o endereço do padrao do 
+        			; sprite do avião
+        ld bc,32		; Carrega em B a quantidade de blocos a
+        			; serem enviados pra VRAM
         ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
-        ; para a tabela de sprites (0x3800)
-        call LDIRVM			; Envia B blocos do endereço HL da RAM
-        ; para o endereço DE da VRAM
+        			; para a tabela de sprites (0x3800)
+        call LDIRVM		; Envia B blocos do endereço HL da RAM
+        			; para o endereço DE da VRAM
 
-        ret					; Volta para a origem da chamada
+        ret			; Volta para a origem da chamada
 
 inicia_attributos_aviao:
 
-            ld hl,aviao1a_attrib; Carrega em HL o endereço do attributo do
-            					; sprite do avião 
-            ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
-            					; Byte 0: Coordenada X
+	ld hl,aviao1a_attrib; Carrega em HL o endereço do attributo do
+            			; sprite do avião 
+	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
+            			; Byte 0: Coordenada X
                                 ; Byte 1: Coordenada Y
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-            ld de,SPR_ATT		; Carrega em DE a posicao iniciao da VRAM
-            					; para a tabela de padroes
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM
-            ld hl,aviao1b_attrib; Carrega em HL o endereço do attributo do
-            					; sprite do avião 
-            ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
-            					; Byte 0: Coordenada X
+	ld de,SPR_ATT		; Carrega em DE a posicao iniciao da VRAM
+            			; para a tabela de padroes
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM
+	ld hl,aviao1b_attrib; Carrega em HL o endereço do attributo do
+            			; sprite do avião 
+	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
+            			; Byte 0: Coordenada X
                                 ; Byte 1: Coordenada Y
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-            ld de,SPR_ATT+4		; Carrega em DE a posicao iniciao da VRAM
-            					; para a tabela de padroes
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM                                
+	ld de,SPR_ATT+4		; Carrega em DE a posicao iniciao da VRAM
+            			; para a tabela de padroes
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM                                
 
 mostra_aviao_descendo:
-            ld hl,aviao2a_pattern; Carrega em HL o endereço do padrao do 
-            					; sprite do avião
-			ld bc,32			; Carrega em B a quantidade de blocos a
-            					; serem enviados pra VRAM
-            ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
-            					; para a tabela de sprites (0x3800)
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM
-            ld hl,aviao2b_pattern; Carrega em HL o endereço do padrao do 
-            					; sprite do avião
-			ld bc,32			; Carrega em B a quantidade de blocos a
-            					; serem enviados pra VRAM
-            ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
-            					; para a tabela de sprites (0x3800)
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
-            					; para o endereço DE da VRAM
-            ld a,(status_aviao)
-            ld a,-1
-            ld (status_aviao),a
-            ret					; Volta para a origem da chamada
+	ld hl,aviao2a_pattern; Carrega em HL o endereço do padrao do 
+            			; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+            			; serem enviados pra VRAM
+	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
+            			; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM
+	ld hl,aviao2b_pattern	; Carrega em HL o endereço do padrao do 
+            			; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+            			; serem enviados pra VRAM
+	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
+            			; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM
+	ld a,(status_aviao)
+	sub 1
+	ld (status_aviao),a
+	ret			; Volta para a origem da chamada
 
 
 mostra_aviao_subindo:
-            ld hl,aviao3a_pattern; Carrega em HL o endereço do padrao do 
+	ld hl,aviao3a_pattern; Carrega em HL o endereço do padrao do 
             					; sprite do avião
-			ld bc,32			; Carrega em B a quantidade de blocos a
+	ld bc,32			; Carrega em B a quantidade de blocos a
             					; serem enviados pra VRAM
-            ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
+	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
             					; para a tabela de sprites (0x3800)
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
+	call LDIRVM			; Envia B blocos do endereço HL da RAM
             					; para o endereço DE da VRAM
-            ld hl,aviao3b_pattern; Carrega em HL o endereço do padrao do 
+	ld hl,aviao3b_pattern; Carrega em HL o endereço do padrao do 
             					; sprite do avião
-			ld bc,32			; Carrega em B a quantidade de blocos a
+	ld bc,32			; Carrega em B a quantidade de blocos a
             					; serem enviados pra VRAM
-            ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
+	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
             					; para a tabela de sprites (0x3800)
-            call LDIRVM			; Envia B blocos do endereço HL da RAM
+	call LDIRVM			; Envia B blocos do endereço HL da RAM
             					; para o endereço DE da VRAM
-            ld a,(status_aviao)
-            ld a,1
-            ld (status_aviao),a
-            ret					; Volta para a origem da chamada
+	ld a,(status_aviao)
+	ld a,1
+	ld (status_aviao),a
+	ret					; Volta para a origem da chamada
             
 mostra_nuvens:
-            ld hl,nuvem01_pattern ; Carrega o endereço do padrao da 
+	ld hl,nuvem01_pattern ; Carrega o endereço do padrao da 
             					; nuvem01 em HL
-			ld bc,32			; Numero de blocos a serem copiados pra VRAM
-            ld de,SPR_PAT+64	; Coloca em DE a posicao inicial da tabela
+	ld bc,32			; Numero de blocos a serem copiados pra VRAM
+	ld de,SPR_PAT+64	; Coloca em DE a posicao inicial da tabela
             					; de sprites da VRAM + um offset de 32 bytes
                                 ; para copia dos dados do sprite 1
-            call LDIRVM			; Transfere BC blocos da posicao HL da RAM
+	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
             					; para posicao DE da VRAM
-            ld hl,nuvem01_attrib ; Carrega o endereço do attributo da 
+	ld hl,nuvem01_attrib ; Carrega o endereço do attributo da 
             					; nuvem01 em HL
-            ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
+	ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
             					; Byte 0: Coordenada vertical
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
@@ -233,29 +234,29 @@ mostra_nuvens:
             
 mostra_sol:
             ld hl,sol01a_pattern; Coloca o endereço do tile em HL
-            ld bc,16			; Coloca em BC a quantidade de bytes do tile
-            ld de,$01e0			; Coloca em DE endereço da VRAM da posicao
-            					; y = 01 e x = e0 (224). Cada tile possui
+            ld bc,16		; Coloca em BC a quantidade de bytes do tile
+            ;ld de,$1010		; Coloca em DE endereço da VRAM da posicao
+            ld de,$0080
+            			; y = 01 e x = e0 (224). Cada tile possui
                                 ; 8 x 8 pixels e sao gravados na area de
                                 ; nomes na VRAM entre $0000 e #2000 (8192)
                                 ; para aparecem na área visivel da tela
-            call LDIRVM			; Envia os 16 blocos do tile pra VRAM
-            
-            ld a,$b7			; Carrega em a o valor das cores:
-            					; b=amarelo (11) para bits 1 do tile e
+            call LDIRVM		; Envia os 16 blocos do tile pra VRAM
+            ld a,$b7		; Carrega em a o valor das cores:
+            			; b=amarelo (11) para bits 1 do tile e
                                 ; 7=ciano para os bits 0 do tile que estiver
                                 ; ocupando o endereço correspondente na 
                                 ; VRAM
-            ld bc,16			; carrega a quantidade de blocos em BC
-            ld hl,$21e0			; carrega em hl o destino na VRAM para 
-            					; preencher com as cores definidas em A
+            ld bc,16		; carrega a quantidade de blocos em BC
+            ld hl,$21e0		; carrega em hl o destino na VRAM para 
+            			; preencher com as cores definidas em A
                                 ; Cada byte no endereço $2000 adiante é 
                                 ; referente a uma linha do tile alocado em 
                                 ; $0000, entao como colocamos 16 bytes no
                                 ; inicio da VRAM usando o sol01a_pattern
                                 ; tambem precisamos colorir os 16 bytes
-            call FILVRM			; Preenche na VRAM entre $2000 e $2015
-            					; com os valores de cores $b7 (amarelo para
+            call FILVRM		; Preenche na VRAM entre $2000 e $2015
+            			; com os valores de cores $b7 (amarelo para
                                 ; bits 1, ciano para bits 0)
             
             ld hl,sol01b_pattern; Fazemos o mesmo agora com os blocos
