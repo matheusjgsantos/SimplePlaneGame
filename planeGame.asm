@@ -27,6 +27,18 @@ FILVRM:		equ 0x0056	; Preenche BC blocos no endereço HL da VRAM
 				; com os dados definidos em A
 CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
 
+
+
+.posicao	defl 0
+.preenche	defl 0
+pista_scroll	defl 0
+status_aviao	defl 0
+
+.aviaoH		defl 5	; Posicao horizontal do sprite do aviao
+.aviaoV 	defl 5  ; posicao vertical do sprite do aviao
+.nuvem01H      	defl 10	; posisao horizontal do sprite da nuvem01
+.nuvem02H       defl 20	; posicao horizontal do sprite da nuvem02
+
         org 0x4000
         
 ; MSX cartridge header @ 0x4000 - 0x400f
@@ -63,19 +75,17 @@ start:
         ld hl,CLIKSW	; Carrega a variavel de sistema do som de click
         ld (hl),$00	; e altera o valor para $00 (desligado)
         call CHGSND	; Desliga o som de click das teclas
-        ld hl,$10
-        ld (.aviaoH),hl
-        ld (.aviaoV),hl
+
     
 mainLoop:
         call reset_tabela_nomes
         call desenha_borda; chama  rotina de desenho da borda	
         ;call desenha_pista
-        ;call inicia_attributos_aviao
-        ;call mostra_aviao
-        ;call mostra_nuvens
-        call mostra_sol
-        ;call movimenta_loop
+        call inicia_attributos_aviao
+        call mostra_aviao
+        call mostra_nuvens
+        ;call mostra_sol
+       	call movimenta_loop
         ;call CHGET
         ret
             
@@ -132,7 +142,7 @@ inicia_attributos_aviao:
             			; para a tabela de padroes
 	call LDIRVM		; Envia B blocos do endereço HL da RAM
             			; para o endereço DE da VRAM
-	ld hl,aviao1b_attrib; Carrega em HL o endereço do attributo do
+	ld hl,aviao1b_attrib	; Carrega em HL o endereço do attributo do
             			; sprite do avião 
 	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
             			; Byte 0: Coordenada X
@@ -142,7 +152,8 @@ inicia_attributos_aviao:
 	ld de,SPR_ATT+4		; Carrega em DE a posicao iniciao da VRAM
             			; para a tabela de padroes
 	call LDIRVM		; Envia B blocos do endereço HL da RAM
-            			; para o endereço DE da VRAM                                
+            			; para o endereço DE da VRAM 
+        ret
 
 mostra_aviao_descendo:
 	ld hl,aviao2a_pattern; Carrega em HL o endereço do padrao do 
@@ -280,65 +291,65 @@ mostra_sol:
 
 movimenta_loop:			; Esse é o loop que cuida da movimentação
 				; de todos os sprites
-	ld a,0		; 0 = Teclas de cursor
+	ld a,0			; 0 = Teclas de cursor
 	call checa_cursor	; rotina para checar as teclas de cursor
-	ld a,1		; 1 = Joystick na porta 1
+	ld a,1			; 1 = Joystick na porta 1
 	call checa_cursor	; rotina para checar as teclas de cursor
-	call movimenta_aviao; Rotina da movimentacao do aviao
-	call movimenta_nuvem; Rotina da movimentacao das nuvens
+	call movimenta_aviao	; Rotina da movimentacao do aviao
+	;call movimenta_nuvem	; Rotina da movimentacao das nuvens
 	;call desenha_pista
-	ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
+	;ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
 				; tudo se move muito rapido
-	call espera_nuvem	; Rotina de delay
+	;call espera_nuvem	; Rotina de delay
 	jp movimenta_loop	; retorna pro inicio do loop
            			            
 movimenta_aviao:
 
-            ;ld a,(.aviaoV)
-            
-            ;cp 4
-            ;jp z,lim_aviao_cim
-            
-            ;cp 120
-            ;jp z,lim_aviao_bai
-            
-            ;ld (.aviaoV),a
-            
-            ;ld a,(.aviaoH)
-            
-            ;cp 8
-            ;jp z,lim_aviao_esq
-            
-            ;cp 232			    ; Compara A com 240 (fim da tela)           
-            ;jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
-            					; valor de .aviaoH. Util para quanto
-                                ; quisermos limitar a janela de movimento
-                                
-            	;ld (.aviaoH),A		; Coloca o valor de A em .aviaoH
-            
-		ld hl,SPR_ATT
-		ld a,(.aviaoV)
-		call WRTVRM
+        ld a,(.aviaoV)
 
-		ld hl,SPR_ATT+1	; Coloca em HL a posicao da tabela de 	
-            			; atributo de sprite + 1, que define a 
-            			; movimentacao horizontal do sprite 0
-		ld a,(.aviaoH)	; carrega o valor definido em .aviaoH em A
-		call WRTVRM		; Coloca na posical HL da VRAM o valor de A
+        cp 4
+        jp z,lim_aviao_cim
 
-		ld hl,SPR_ATT+4
-		ld a,(.aviaoV)
-		call WRTVRM
+        cp 120
+        jp z,lim_aviao_bai
 
-		ld hl,SPR_ATT+5
-		ld a,(.aviaoH)
-		call WRTVRM
+        ld (.aviaoV),a
+
+        ld a,(.aviaoH)
+
+        cp 8
+        jp z,lim_aviao_esq
+
+        cp 232			; Compara A com 240 (fim da tela)           
+        jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
+        			; valor de .aviaoH. Util para quanto
+        			; quisermos limitar a janela de movimento
+
+        ;ld (.aviaoH),A		; Coloca o valor de A em .aviaoH
             
-		;ld a,(status_aviao)
-            	;ld a,0
-            
-            	ret					; retorna pra origem da chamada
-            
+	ld hl,SPR_ATT
+        ld a,(.aviaoV)
+        call WRTVRM
+
+        ld hl,SPR_ATT+1	; Coloca em HL a posicao da tabela de 	
+        		; atributo de sprite + 1, que define a 
+        		; movimentacao horizontal do sprite 0
+        ld a,(.aviaoH)	; carrega o valor definido em .aviaoH em A
+        call WRTVRM	; Coloca na posical HL da VRAM o valor de A
+
+        ld hl,SPR_ATT+4
+        ld a,(.aviaoV)
+        call WRTVRM
+
+        ld hl,SPR_ATT+5
+        ld a,(.aviaoH)
+        call WRTVRM
+
+        ld a,(status_aviao)
+        ld a,0
+
+        ret					; retorna pra origem da chamada
+
 lim_aviao_esq:
 		ld a,10
         	ld (.aviaoH),a
@@ -414,9 +425,10 @@ cursor_esquerda:
         cp 7						; a = 1 - tecla para cima
         jr nz,cursor_direita		; se a nao for 1 pula para proxima
         push af						; salva AF na pilha
-        ld a,(.aviaoH)				; carrega valor de .aviaoV em A
-        add a,-1			; decrementa A        
-        ld (.aviaoH),a				; Retorna valor de A para .aviaoV
+        ;ld a,(.aviaoH)				; carrega valor de .aviaoV em A
+        ;add a,-1			; decrementa A        
+        ;ld (.aviaoH),a				; Retorna valor de A para .aviaoV
+        .aviaoH--
         ld a,(status_aviao)
         cp 255
         call nz, mostra_aviao_subindo        
@@ -428,9 +440,10 @@ cursor_direita:
         cp 3
         jr nz,sai_loop
         push af
-        ld a,(.aviaoV)
-        INC a
-        ld (.aviaoV),a
+        ;ld a,(.aviaoV)
+        ;INC a
+        ;ld (.aviaoV),a
+        .aviaoH--
         ld a,(status_aviao)
         cp 255
         call nz,mostra_aviao_descendo
@@ -447,24 +460,27 @@ sai_loop:
 		ret
 
 reset_status:
+	status_aviao = 0
 	call mostra_aviao
         RET
 
 add_status:
-	push af
-	ld a,(status_aviao)
-        add a,1
-        ld (status_aviao),a
-        POP AF
+	;push af
+	;ld a,(status_aviao)
+        ;add a,1
+        ;ld (status_aviao),a
+        ;POP AF
+        status_aviao++
         RET
 
 sub_status:
-	PUSH AF
-        ld a,(status_aviao)
-        ld a,0
-        add a,-1
-        ld (status_aviao),a
-        POP AF
+	;PUSH AF
+        ;ld a,(status_aviao)
+        ;ld a,0
+        ;add a,-1
+        ;ld (status_aviao),a
+        ;POP AF
+        status_aviao--
         ret
 
 desenha_borda:     
@@ -1393,14 +1409,3 @@ VDP:        	DS 28,0
 message:
 		db "Debug: ",0
 
-
-
-.posicao:	.db 10
-.preenche:	.db 10
-pista_scroll:	.db $0
-status_aviao:	.db 0
-
-.aviaoH:	.db $10	; Posicao horizontal do sprite do aviao
-.aviaoV:	.db $08   ; posicao vertical do sprite do aviao
-.nuvem01H:      .db $ff	; posisao horizontal do sprite da nuvem01
-.nuvem02H:      .db $30	; posicao horizontal do sprite da nuvem02
