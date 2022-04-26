@@ -29,20 +29,12 @@ CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
 
 
 
-.posicao	defl 0
-.preenche	defl 0
-pista_scroll	defl 0
-status_aviao	defl 0
 
-.aviaoH		defl 5	; Posicao horizontal do sprite do aviao
-.aviaoV 	defl 5  ; posicao vertical do sprite do aviao
-.nuvem01H      	defl 10	; posisao horizontal do sprite da nuvem01
-.nuvem02H       defl 20	; posicao horizontal do sprite da nuvem02
 
         org 0x4000
         
 ; MSX cartridge header @ 0x4000 - 0x400f
-	dw 0x4241
+	dw 0x4241;4241
         dw start
         dw start
         dw 0
@@ -305,7 +297,7 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
            			            
 movimenta_aviao:
 
-        ld a,(.aviaoV)
+        ld a,(aviaoV)
 
         cp 4
         jp z,lim_aviao_cim
@@ -313,36 +305,36 @@ movimenta_aviao:
         cp 120
         jp z,lim_aviao_bai
 
-        ld (.aviaoV),a
+        ld (aviaoV),a
 
-        ld a,(.aviaoH)
+        ld a,(aviaoH)
 
         cp 8
         jp z,lim_aviao_esq
 
         cp 232			; Compara A com 240 (fim da tela)           
         jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
-        			; valor de .aviaoH. Util para quanto
+        			; valor de aviaoH. Util para quanto
         			; quisermos limitar a janela de movimento
 
-        ;ld (.aviaoH),A		; Coloca o valor de A em .aviaoH
+        ;ld (aviaoH),A		; Coloca o valor de A em aviaoH
             
 	ld hl,SPR_ATT
-        ld a,(.aviaoV)
+        ld a,(aviaoV)
         call WRTVRM
 
         ld hl,SPR_ATT+1	; Coloca em HL a posicao da tabela de 	
         		; atributo de sprite + 1, que define a 
         		; movimentacao horizontal do sprite 0
-        ld a,(.aviaoH)	; carrega o valor definido em .aviaoH em A
+        ld a,(aviaoH)	; carrega o valor definido em aviaoH em A
         call WRTVRM	; Coloca na posical HL da VRAM o valor de A
 
         ld hl,SPR_ATT+4
-        ld a,(.aviaoV)
+        ld a,(aviaoV)
         call WRTVRM
 
         ld hl,SPR_ATT+5
-        ld a,(.aviaoH)
+        ld a,(aviaoH)
         call WRTVRM
 
         ld a,(status_aviao)
@@ -352,40 +344,40 @@ movimenta_aviao:
 
 lim_aviao_esq:
 		ld a,10
-        	ld (.aviaoH),a
+        	ld (aviaoH),a
             	ret
             
 lim_aviao_dir:
 		ld a,230			; Coloca 0 em A 	
-		ld (.aviaoH),a		; Coloca A em .aviaoH, resetando a posição
+		ld (aviaoH),a		; Coloca A em aviaoH, resetando a posição
             	ret					; retorna pra origem da chamada
 
 lim_aviao_cim:
 		ld a,6
-            	ld (.aviaoV),a
+            	ld (aviaoV),a
             	ret
             
 lim_aviao_bai:
 		ld a,118			; Coloca 0 em A 	
-		ld (.aviaoV),a		; Coloca A em .aviaoH, resetando a posição
+		ld (aviaoV),a		; Coloca A em aviaoH, resetando a posição
             	ret					; retorna pra origem da chamada
 
 movimenta_nuvem:
             	ld hl,SPR_ATT+9		; Coloca em HL a posicao da tabela de 	
             					; atributo de sprite + 5, que define a 
                                 ; movimentacao horizontal do sprite 1
-            	ld a,(.nuvem01H)	; carrega o valor definido em .nuvem01H em A
+            	ld a,(nuvem01H)	; carrega o valor definido em nuvem01H em A
             	call WRTVRM			; Coloca na posical HL da VRAM o valor de A
             	DEC A				; Decrementa A
             	cp 8				; Compara A com 0 (inicio da tela)
             	jp z,reset_nuvem01; Se A = 0,chama rotina de reset do
             					; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
-            	ld (.nuvem01H),a	; Coloca o valor de A em .nuvem01H
+            	ld (nuvem01H),a	; Coloca o valor de A em nuvem01H
             	ld hl,SPR_ATT+13	; Coloca em HL a posicao da tabela de 	
             					; atributo de sprite + 9, que define a 
                                 ; movimentacao horizontal do sprite 2
-		ld a,(.nuvem02H)	; carrega o valor definido em .nuvem02H em A
+		ld a,(nuvem02H)	; carrega o valor definido em nuvem02H em A
             	sub 2				; Subtrai 2 de A para movimentar o sprite 2
             					; mais rapido que os demais
             	call WRTVRM			; Coloca na posical HL da VRAM o valor de A
@@ -393,17 +385,17 @@ movimenta_nuvem:
             	jp z,reset_nuvem02; Se A = 0,chama rotina de reset do
             					; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
-            	ld (.nuvem02H),a	; Coloca o valor de A em .nuvem02H
+            	ld (nuvem02H),a	; Coloca o valor de A em nuvem02H
             	ret					; Retorna pra origem da chamada
 
 reset_nuvem01:			
 		ld a,240-8			; Carrega 240 em A (fim da tela)
-            	ld (.nuvem01H),a	; Coloca A em .nuvem01H, resetando a posição
+            	ld (nuvem01H),a	; Coloca A em nuvem01H, resetando a posição
             	ret					; Retorna pra origem da chamada
 
 reset_nuvem02:
 		ld a,240-8			; Carrega 240 em A (fim da tela)
-            	ld (.nuvem02H),a	; Coloca A em .nuvem01H, resetando a posição
+            	ld (nuvem02H),a	; Coloca A em nuvem01H, resetando a posição
             	ret					; Retorna pra origem da chamada
 
 espera_nuvem:     
@@ -425,10 +417,9 @@ cursor_esquerda:
         cp 7						; a = 1 - tecla para cima
         jr nz,cursor_direita		; se a nao for 1 pula para proxima
         push af						; salva AF na pilha
-        ;ld a,(.aviaoH)				; carrega valor de .aviaoV em A
-        ;add a,-1			; decrementa A        
-        ;ld (.aviaoH),a				; Retorna valor de A para .aviaoV
-        .aviaoH--
+        ld a,(aviaoH)				; carrega valor de aviaoV em A
+        add a,-1			; decrementa A        
+        ld (aviaoH),a				; Retorna valor de A para aviaoV
         ld a,(status_aviao)
         cp 255
         call nz, mostra_aviao_subindo        
@@ -440,10 +431,9 @@ cursor_direita:
         cp 3
         jr nz,sai_loop
         push af
-        ;ld a,(.aviaoV)
-        ;INC a
-        ;ld (.aviaoV),a
-        .aviaoH--
+        ld a,(aviaoV)
+        INC a
+        ld (aviaoV),a
         ld a,(status_aviao)
         cp 255
         call nz,mostra_aviao_descendo
@@ -460,27 +450,26 @@ sai_loop:
 		ret
 
 reset_status:
-	status_aviao = 0
+	ld a,0
+        ld (status_aviao),a
 	call mostra_aviao
         RET
 
 add_status:
-	;push af
-	;ld a,(status_aviao)
-        ;add a,1
-        ;ld (status_aviao),a
-        ;POP AF
-        status_aviao++
+	push af
+	ld a,(status_aviao)
+        add a,1
+        ld (status_aviao),a
+        POP AF        
         RET
 
 sub_status:
-	;PUSH AF
-        ;ld a,(status_aviao)
-        ;ld a,0
-        ;add a,-1
-        ;ld (status_aviao),a
-        ;POP AF
-        status_aviao--
+	PUSH AF
+        ld a,(status_aviao)
+        ld a,0
+        add a,-1
+        ld (status_aviao),a
+        POP AF
         ret
 
 desenha_borda:     
@@ -692,9 +681,9 @@ desenha_borda:
         ld b,14
         ld c,0
         ld hl,$1800+64
-        ld (.posicao),hl
+        ld (posicao),hl
         ld hl,mapa_laterais_secao1
-        ld (.preenche),hl ; Aponta preenche para mapa_laterais_secao1 <- MUITO IMPORTANTE
+        ld (preenche),hl ; Aponta preenche para mapa_laterais_secao1 <- MUITO IMPORTANTE
         call desenha_laterais_secao
 
         ; Segunda seçao da tela  
@@ -725,23 +714,23 @@ desenha_borda:
         ld b,2
         ld c,0
         ld hl,$1a00+128
-        ld (.posicao),hl
+        ld (posicao),hl
         ld hl,mapa_laterais_secao2
-        ld (.preenche),hl 	; Aponta preenche para mapa_laterais_secao2 <- MUITO IMPORTANTE
+        ld (preenche),hl 	; Aponta preenche para mapa_laterais_secao2 <- MUITO IMPORTANTE
         call desenha_laterais_secao
 
         ret
 
 desenha_laterais_secao:
         push bc
-        ld hl,(.preenche)
+        ld hl,(preenche)
         ld bc,32
-        ld de,(.posicao)
+        ld de,(posicao)
         call LDIRVM
-        ld hl,(.posicao)
+        ld hl,(posicao)
         ld de,32
         ADD HL,DE
-        ld (.posicao),hl
+        ld (posicao),hl
         POP BC
         djnz desenha_laterais_secao
         ret
@@ -786,10 +775,10 @@ desenha_pista_01:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_01_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -801,10 +790,10 @@ desenha_pista_02:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_02_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -816,10 +805,10 @@ desenha_pista_03:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_03_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -831,10 +820,10 @@ desenha_pista_04:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_04_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela  
             ld a,(pista_scroll)
@@ -846,10 +835,10 @@ desenha_pista_05:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_05_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -861,10 +850,10 @@ desenha_pista_06:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_06_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -876,10 +865,10 @@ desenha_pista_07:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_07_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
             ld a,(pista_scroll)
@@ -891,10 +880,10 @@ desenha_pista_08:
             ld b,29			; vamos repetir a chamada a seguir 7 vezes
             ld hl,$1008		; carregando a posicao inicial 
             				; Y = 16 ($02) e X = 248 ($f8)
-            ld (.posicao),hl	; carregamos as coordenadas na variave posicao
+            ld (posicao),hl	; carregamos as coordenadas na variave posicao
             ld de,$2000
             ADD HL,DE
-            ld (.preenche),hl
+            ld (preenche),hl
             call desenha_pista_08_loop; e chamamos a rotina para desenhar a
             				; borda direita da tela
 		    ld a,(pista_scroll)
@@ -913,29 +902,29 @@ desenha_pista_01_loop:
 			push BC
             ld hl,pista_01a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_01b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche); carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche); carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -946,31 +935,31 @@ desenha_pista_02_loop:
 			push BC
             ld hl,pista_02a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_02b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -981,31 +970,31 @@ desenha_pista_03_loop:
 			push BC
             ld hl,pista_03a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_03b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1016,31 +1005,31 @@ desenha_pista_04_loop:
 			push BC
             ld hl,pista_04a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_04b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-            ld de,(.preenche)
+            ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1051,31 +1040,31 @@ desenha_pista_05_loop:
 	    push BC
             ld hl,pista_05a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_05b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1086,31 +1075,31 @@ desenha_pista_06_loop:
 			push BC
             ld hl,pista_06a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_06b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1121,31 +1110,31 @@ desenha_pista_07_loop:
 	    push BC
             ld hl,pista_07a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_07b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1156,31 +1145,31 @@ desenha_pista_08_loop:
 			push BC
             ld hl,pista_08a	; carrega a primeira parte da borda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao) ; Y = 120 ($10*8) e X = 16 ($10)
+            ld de,(posicao) ; Y = 120 ($10*8) e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
-            LD HL,(.posicao)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(posicao)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.posicao),hl	; e salva o resultado na variavel "posicao"
+            ld (posicao),hl	; e salva o resultado na variavel "posicao"
          
             ld hl,pista_08b; carrega a segunda parte da borda
             				; inferior esquerda
             ld bc,8			; 1 bloco de 8x8
-            ld de,(.posicao); Y = 136 ($11*8)  e X = 16 ($10)
+            ld de,(posicao); Y = 136 ($11*8)  e X = 16 ($10)
             call LDIRVM		; envia para VRAM
             ;call espera		; delay
             
             ld hl,pista_pattern
-	    ld de,(.preenche)
+	    ld de,(preenche)
             ld bc,$0010
             call LDIRVM
 			
-            LD HL,(.preenche)	; carrega o valor da "variavel" posicao em HL
+            LD HL,(preenche)	; carrega o valor da "variavel" posicao em HL
             ld bc,$0008		; Carrega $0100 em BC
             add hl,bc		; "Soma" HL com BC, 
-            ld (.preenche),hl; e salva o resultado na variavel "posicao"
+            ld (preenche),hl; e salva o resultado na variavel "posicao"
             
             POP BC
             
@@ -1408,4 +1397,21 @@ VDP:        	DS 28,0
             
 message:
 		db "Debug: ",0
-
+                
+		org $8000
+posicao:	
+		db $00
+preenche:	
+		db $00
+pista_scroll:	
+		db $0
+status_aviao:	
+		db $0
+aviaoH:	
+		db $05	; Posicao horizontal do sprite do aviao
+aviaoV: 	
+		db $05  ; posicao vertical do sprite do aviao
+nuvem01H:      
+		db $10	; posisao horizontal do sprite da nuvem01
+nuvem02H:      
+		db $20	; posicao horizontal do sprite da nuvem02
