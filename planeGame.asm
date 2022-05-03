@@ -446,7 +446,8 @@ sai_loop:
 	ret
 
 reset_status:
-	ld a,0
+	;ld a,0
+        dec a
         ld (status_aviao),a
 	call mostra_aviao
         RET
