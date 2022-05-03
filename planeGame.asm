@@ -76,7 +76,7 @@ mainLoop:
         call inicia_attributos_aviao
         call mostra_aviao
         call mostra_nuvens
-        ;call mostra_sol
+        call mostra_sol
        	call movimenta_loop
         ;call CHGET
         ret
@@ -193,47 +193,47 @@ mostra_aviao_subindo:
 	ret					; Volta para a origem da chamada
             
 mostra_nuvens:
-	ld hl,nuvem01_pattern ; Carrega o endereço do padrao da 
-            					; nuvem01 em HL
-	ld bc,32			; Numero de blocos a serem copiados pra VRAM
+	ld hl,nuvem01_pattern 	; Carrega o endereço do padrao da 
+            			; nuvem01 em HL
+	ld bc,32		; Numero de blocos a serem copiados pra VRAM
 	ld de,SPR_PAT+64	; Coloca em DE a posicao inicial da tabela
-            					; de sprites da VRAM + um offset de 32 bytes
+            			; de sprites da VRAM + um offset de 32 bytes
                                 ; para copia dos dados do sprite 1
-	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
-            					; para posicao DE da VRAM
-	ld hl,nuvem01_attrib ; Carrega o endereço do attributo da 
-            					; nuvem01 em HL
-	ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
-            					; Byte 0: Coordenada vertical
+	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
+            			; para posicao DE da VRAM
+	ld hl,nuvem01_attrib 	; Carrega o endereço do attributo da 
+            			; nuvem01 em HL
+	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
+            			; Byte 0: Coordenada vertical
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
 	ld de,SPR_ATT+8		; Carrega em DE a posicao iniciao da VRAM
-            					; para a tabela de padroes + offset de 4 
+            			; para a tabela de padroes + offset de 4 
                                 ; bytes para o sprite 1
-	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
-            					; para posicao DE da VRAM
-	ld hl,nuvem02_pattern ; Carrega o endereço do padrao da 
-            					; nuvem01 em HL
-	ld bc,32			; Numero de blocos a serem copiados pra VRAM
+	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
+            			; para posicao DE da VRAM
+	ld hl,nuvem02_pattern 	; Carrega o endereço do padrao da 
+            			; nuvem01 em HL
+	ld bc,32		; Numero de blocos a serem copiados pra VRAM
 	ld de,SPR_PAT+96	; Coloca em DE a posicao inicial da tabela
-            					; de sprites da VRAM + um offset de 64 bytes
+            			; de sprites da VRAM + um offset de 64 bytes
                                 ; para copia dos dados do sprite 2
-	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
-            					; para posicao DE da VRAM
-	ld hl,nuvem02_attrib ; Carrega o endereço do attributo da 
-            					; nuvem01 em HL
-	ld bc,4				; Os atributos de sprite sao sempre 4 bytes:
-            					; Byte 0: Coordenada vertical
+	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
+            			; para posicao DE da VRAM
+	ld hl,nuvem02_attrib 	; Carrega o endereço do attributo da 
+            			; nuvem01 em HL
+	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
+            			; Byte 0: Coordenada vertical
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
 	ld de,SPR_ATT+12	; Carrega em DE a posicao iniciao da VRAM
-            					; para a tabela de padroes + offset de 8 
+            			; para a tabela de padroes + offset de 8 
                                 ; bytes para o sprite 2
-	call LDIRVM			; Transfere BC blocos da posicao HL da RAM
-            					; para posicao DE da VRAM
-	ret					; retorna para a origem da chamada
+	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
+            			; para posicao DE da VRAM
+	ret			; retorna para a origem da chamada
             
 mostra_sol:
         ld hl,sol01a_pattern; Coloca o endereço do tile em HL
@@ -288,11 +288,11 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
 	ld a,1			; 1 = Joystick na porta 1
 	call checa_cursor	; rotina para checar as teclas de cursor
 	call movimenta_aviao	; Rotina da movimentacao do aviao
-	;call movimenta_nuvem	; Rotina da movimentacao das nuvens
+	call movimenta_nuvem	; Rotina da movimentacao das nuvens
 	;call desenha_pista
-	;ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
+	ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
 				; tudo se move muito rapido
-	;call espera_nuvem	; Rotina de delay
+	call espera_nuvem	; Rotina de delay
 	jp movimenta_loop	; retorna pro inicio do loop
            			            
 movimenta_aviao:
@@ -317,7 +317,7 @@ movimenta_aviao:
         			; valor de aviaoH. Util para quanto
         			; quisermos limitar a janela de movimento
 
-        ;ld (aviaoH),A		; Coloca o valor de A em aviaoH
+        ld (aviaoH),A		; Coloca o valor de A em aviaoH
             
 	ld hl,SPR_ATT
         ld a,(aviaoV)
@@ -343,38 +343,38 @@ movimenta_aviao:
         ret					; retorna pra origem da chamada
 
 lim_aviao_esq:
-		ld a,10
-        	ld (aviaoH),a
-            	ret
+	ld a,10
+	ld (aviaoH),a
+	ret
             
 lim_aviao_dir:
-		ld a,230			; Coloca 0 em A 	
-		ld (aviaoH),a		; Coloca A em aviaoH, resetando a posição
-            	ret					; retorna pra origem da chamada
+	ld a,230	; Coloca 0 em A 	
+	ld (aviaoH),a	; Coloca A em aviaoH, resetando a posição
+	ret		; retorna pra origem da chamada
 
 lim_aviao_cim:
-		ld a,6
-            	ld (aviaoV),a
-            	ret
+	ld a,6
+	ld (aviaoV),a
+	ret
             
 lim_aviao_bai:
-		ld a,118			; Coloca 0 em A 	
-		ld (aviaoV),a		; Coloca A em aviaoH, resetando a posição
-            	ret					; retorna pra origem da chamada
+	ld a,118	; Coloca 0 em A 	
+	ld (aviaoV),a	; Coloca A em aviaoH, resetando a posição
+	ret		; retorna pra origem da chamada
 
 movimenta_nuvem:
-            	ld hl,SPR_ATT+9		; Coloca em HL a posicao da tabela de 	
-            					; atributo de sprite + 5, que define a 
+            	ld hl,SPR_ATT+9	; Coloca em HL a posicao da tabela de 	
+            			; atributo de sprite + 5, que define a 
                                 ; movimentacao horizontal do sprite 1
             	ld a,(nuvem01H)	; carrega o valor definido em nuvem01H em A
-            	call WRTVRM			; Coloca na posical HL da VRAM o valor de A
-            	DEC A				; Decrementa A
-            	cp 8				; Compara A com 0 (inicio da tela)
+            	call WRTVRM	; Coloca na posical HL da VRAM o valor de A
+            	DEC A		; Decrementa A
+            	cp 8		; Compara A com 0 (inicio da tela)
             	jp z,reset_nuvem01; Se A = 0,chama rotina de reset do
-            					; valor de nuvem_h para posicionar o sprite
+            			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
             	ld (nuvem01H),a	; Coloca o valor de A em nuvem01H
-            	ld hl,SPR_ATT+13	; Coloca em HL a posicao da tabela de 	
+            	ld hl,SPR_ATT+13; Coloca em HL a posicao da tabela de 	
             					; atributo de sprite + 9, que define a 
                                 ; movimentacao horizontal do sprite 2
 		ld a,(nuvem02H)	; carrega o valor definido em nuvem02H em A
@@ -408,24 +408,23 @@ espera_nuvem:
 
             
 checa_cursor:
-        call GTSTCK  				; Chama a rotina de checagem do cursor  
-        cp 0						; A = 0 - sem tecla pressionada
-        jp z,sai_loop				; sai do loop
-        jr cursor_esquerda			; proxima checagem
+        call GTSTCK  		; Chama a rotina de checagem do cursor  
+        cp 0			; A = 0 - sem tecla pressionada
+        jp z,sai_loop		; sai do loop
+        jr cursor_esquerda	; proxima checagem
 
 cursor_esquerda:
-        cp 7						; a = 1 - tecla para cima
-        jr nz,cursor_direita		; se a nao for 1 pula para proxima
-        push af						; salva AF na pilha
-        ld a,(aviaoH)				; carrega valor de aviaoV em A
-        add a,-1			; decrementa A        
-        ld (aviaoH),a				; Retorna valor de A para aviaoV
-        ld a,(status_aviao)
-        cp 255
+        cp 7			; a = 1 - tecla para cima
+        jr nz,cursor_direita	; se a nao for 1 pula para proxima
+        push af			; salva AF na pilha
+        ld a,(aviaoV)		; carrega valor de aviaoV em A
+        add a,-1		; decresce A        
+        ld (aviaoV),a		; Retorna valor de A para aviaoV
+        ld a,(status_aviao)	; 
+        cp 1			;
         call nz, mostra_aviao_subindo        
-        pop af		; retorna AF da pilha
-        ret							; retorna para origem da chamada
-        
+        pop af			; retorna AF da pilha
+        ret			; retorna para origem da chamada
 
 cursor_direita:
         cp 3
@@ -435,7 +434,7 @@ cursor_direita:
         INC a
         ld (aviaoV),a
         ld a,(status_aviao)
-        cp 255
+        cp 1
         call nz,mostra_aviao_descendo
         pop af
         ret
@@ -475,7 +474,7 @@ sub_status:
 desenha_borda:     
 ; primeira seçao da tela
         ld hl,frame_supesq_01a; carrega o padrao do desenho da borda
-            				; superior esquerda. Vamos carregar 1 bloco
+            			; superior esquerda. Vamos carregar 1 bloco
         ld bc,8			; de 8x8 e colocar na VRAM na posicao do
         ld de,$0008		; Slot 1 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; Envia dos dados pra VRAM
@@ -683,7 +682,7 @@ desenha_borda:
         ld hl,$1800+64
         ld (posicao),hl
         ld hl,mapa_laterais_secao1
-        ld (preenche),hl ; Aponta preenche para mapa_laterais_secao1 <- MUITO IMPORTANTE
+        ld (preenche),hl 	; Aponta preenche para mapa_laterais_secao1 <- MUITO IMPORTANTE
         call desenha_laterais_secao
 
         ; Segunda seçao da tela  
@@ -739,7 +738,7 @@ desenha_pista:
 	ld hl,$0110
         call POSIT
 	ld a,(pista_scroll)
-	;call GRPPRT
+        
 	cp 0
 	jp z,desenha_pista_01
 
@@ -767,7 +766,6 @@ desenha_pista:
 	cp 8
 	jp z,reset_desenha_pista
             
-	;call CHGET
 	ret
 
             
@@ -1180,13 +1178,13 @@ espera:
 			PUSH BC			; Salva BC na pilha
             LD BC,$008f		; Executa NOP por 1535 vezes
 espera_loop
-			NOP				; Nao executa nada por um ciclo
-            DEC BC 			; Decrementa o valor do contador BC
-			LD A,C			; Carrega o valor de A em C
-			OR B 			; A = C OR B
-			JR NZ,espera_loop; Se A = zero termina o loop
-            pop BC
-            ret				; Retorna para a origem da chamada
+	NOP		; Nao executa nada por um ciclo
+	DEC BC 		; Decrementa o valor do contador BC
+	LD A,C		; Carrega o valor de A em C
+	OR B 		; A = C OR B
+	JR NZ,espera_loop; Se A = zero termina o loop
+	pop BC
+	ret		; Retorna para a origem da chamada
             
 
 ; Sprites gerados usando o TinySprite: http://msx.jannone.org/tinysprite/tinysprite.html
@@ -1261,8 +1259,8 @@ nuvem02_pattern:
               DB $FC,$4C,$F8,$80,$00,$00,$00,$00
 
 sol01a_pattern: 
-              DB $03,$0F,$1F,$3F,$7F,$7F,$FF,$FF
-              DB $C0,$F0,$F8,$FC,$FE,$FE,$FF,$FF          
+		DB $03,$0F,$1F,$3F,$7F,$7F,$FF,$FF
+		DB $C0,$F0,$F8,$FC,$FE,$FE,$FF,$FF          
 
 
 sol01b_pattern:
@@ -1282,7 +1280,7 @@ nuvem01_attrib:
 nuvem02_attrib:
 		DB $60,$30,$0C,$0f            
 
-; Tiles gerados no TinySprite do Janone
+; Tiles gerados no TinySprite do Jannone
 frame_supesq_01a:
             	DB $39,$67,$CC,$97,$A2,$34,$59,$D3
             
@@ -1398,20 +1396,20 @@ VDP:        	DS 28,0
 message:
 		db "Debug: ",0
                 
-		org $8000
-posicao:	
-		db $00
-preenche:	
-		db $00
+		org $8000	; Area de memoria RAM para gravacao de variaveis
 pista_scroll:	
 		db $0
 status_aviao:	
 		db $0
 aviaoH:	
-		db $05	; Posicao horizontal do sprite do aviao
+		dw $05	; Posicao horizontal do sprite do aviao
 aviaoV: 	
-		db $05  ; posicao vertical do sprite do aviao
+		dw $05  ; posicao vertical do sprite do aviao
 nuvem01H:      
 		db $10	; posisao horizontal do sprite da nuvem01
 nuvem02H:      
 		db $20	; posicao horizontal do sprite da nuvem02
+posicao:	
+		dw $00
+preenche:	
+		dw $00
