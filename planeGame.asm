@@ -145,6 +145,12 @@ inicia_attributos_aviao:
             			; para a tabela de padroes
 	call LDIRVM		; Envia B blocos do endereço HL da RAM
             			; para o endereço DE da VRAM 
+        
+        ld a,10
+        ld (aviaoV),a		; Coloca o aviao na posicao 10 vertical
+        ld (aviaoH),a		; Coloca o aviao na posico 10 horizontal
+        call movimenta_aviao	; Chama rotina para desenho do aviao
+        
         ret
 
 mostra_aviao_descendo:
@@ -165,7 +171,7 @@ mostra_aviao_descendo:
 	call LDIRVM		; Envia B blocos do endereço HL da RAM
             			; para o endereço DE da VRAM
 	ld a,(status_aviao)
-	sub 1
+	add a,1
 	ld (status_aviao),a
 	ret			; Volta para a origem da chamada
 
@@ -188,9 +194,9 @@ mostra_aviao_subindo:
 	call LDIRVM		; Envia B blocos do endereço HL da RAM
 				; para o endereço DE da VRAM
 	ld a,(status_aviao)
-	ld a,1
+	add a,1
 	ld (status_aviao),a
-	ret					; Volta para a origem da chamada
+	ret			; Volta para a origem da chamada
             
 mostra_nuvens:
 	ld hl,nuvem01_pattern 	; Carrega o endereço do padrao da 
@@ -297,37 +303,38 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
            			            
 movimenta_aviao:
 
-        ld a,(aviaoV)
+        ;ld a,(aviaoV)
 
-        cp 4
-        jp z,lim_aviao_cim
+        ;cp 4
+        ;jp z,lim_aviao_cim
 
-        cp 120
-        jp z,lim_aviao_bai
+        ;cp 120
+        ;jp z,lim_aviao_bai
 
-        ld (aviaoV),a
+        ;ld (aviaoV),a
 
-        ld a,(aviaoH)
+        ;ld a,(aviaoH)
 
-        cp 8
-        jp z,lim_aviao_esq
+        ;cp 8
+        ;jp z,lim_aviao_esq
 
-        cp 232			; Compara A com 240 (fim da tela)           
-        jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
+        ;cp 232			; Compara A com 240 (fim da tela)           
+        ;jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
         			; valor de aviaoH. Util para quanto
         			; quisermos limitar a janela de movimento
 
-        ld (aviaoH),A		; Coloca o valor de A em aviaoH
-            
+        ;ld (aviaoH),A		; Coloca o valor de A em aviaoH
+        
+        ;ld (aviaoV),a
 	ld hl,SPR_ATT
         ld a,(aviaoV)
         call WRTVRM
 
-        ld hl,SPR_ATT+1	; Coloca em HL a posicao da tabela de 	
-        		; atributo de sprite + 1, que define a 
-        		; movimentacao horizontal do sprite 0
-        ld a,(aviaoH)	; carrega o valor definido em aviaoH em A
-        call WRTVRM	; Coloca na posical HL da VRAM o valor de A
+        ld hl,SPR_ATT+1		; Coloca em HL a posicao da tabela de 	
+        			; atributo de sprite + 1, que define a 
+        			; movimentacao horizontal do sprite 0
+        ld a,(aviaoH)		; carrega o valor definido em aviaoH em A
+        call WRTVRM		; Coloca na posical HL da VRAM o valor de A
 
         ld hl,SPR_ATT+4
         ld a,(aviaoV)
@@ -337,10 +344,7 @@ movimenta_aviao:
         ld a,(aviaoH)
         call WRTVRM
 
-        ld a,(status_aviao)
-        ld a,0
-
-        ret					; retorna pra origem da chamada
+        ret		; retorna pra origem da chamada
 
 lim_aviao_esq:
 	ld a,10
@@ -352,60 +356,49 @@ lim_aviao_dir:
 	ld (aviaoH),a	; Coloca A em aviaoH, resetando a posição
 	ret		; retorna pra origem da chamada
 
-lim_aviao_cim:
-	ld a,6
-	ld (aviaoV),a
-	ret
-            
-lim_aviao_bai:
-	ld a,118	; Coloca 0 em A 	
-	ld (aviaoV),a	; Coloca A em aviaoH, resetando a posição
-	ret		; retorna pra origem da chamada
-
 movimenta_nuvem:
-            	ld hl,SPR_ATT+9	; Coloca em HL a posicao da tabela de 	
+	ld hl,SPR_ATT+9		; Coloca em HL a posicao da tabela de 	
             			; atributo de sprite + 5, que define a 
                                 ; movimentacao horizontal do sprite 1
-            	ld a,(nuvem01H)	; carrega o valor definido em nuvem01H em A
-            	call WRTVRM	; Coloca na posical HL da VRAM o valor de A
-            	DEC A		; Decrementa A
-            	cp 8		; Compara A com 0 (inicio da tela)
-            	jp z,reset_nuvem01; Se A = 0,chama rotina de reset do
+	ld a,(nuvem01H)		; carrega o valor definido em nuvem01H em A
+	call WRTVRM		; Coloca na posical HL da VRAM o valor de A
+	DEC A			; Decrementa A
+	cp 8			; Compara A com 0 (inicio da tela)
+	jp z,reset_nuvem01	; Se A = 0,chama rotina de reset do
             			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
-            	ld (nuvem01H),a	; Coloca o valor de A em nuvem01H
-            	ld hl,SPR_ATT+13; Coloca em HL a posicao da tabela de 	
-            					; atributo de sprite + 9, que define a 
+	ld (nuvem01H),a		; Coloca o valor de A em nuvem01H
+	ld hl,SPR_ATT+13	; Coloca em HL a posicao da tabela de 	
+          			; atributo de sprite + 9, que define a 
                                 ; movimentacao horizontal do sprite 2
-		ld a,(nuvem02H)	; carrega o valor definido em nuvem02H em A
-            	sub 2				; Subtrai 2 de A para movimentar o sprite 2
-            					; mais rapido que os demais
-            	call WRTVRM			; Coloca na posical HL da VRAM o valor de A
-            	cp 8				; Compara A com 0 (inicio da tela)
-            	jp z,reset_nuvem02; Se A = 0,chama rotina de reset do
-            					; valor de nuvem_h para posicionar o sprite
+	ld a,(nuvem02H)		; carrega o valor definido em nuvem02H em A
+	sub 2			; Subtrai 2 de A para movimentar o sprite 2
+            			; mais rapido que os demais
+	call WRTVRM		; Coloca na posical HL da VRAM o valor de A
+	cp 8			; Compara A com 0 (inicio da tela)
+	jp z,reset_nuvem02	; Se A = 0,chama rotina de reset do
+            			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
-            	ld (nuvem02H),a	; Coloca o valor de A em nuvem02H
-            	ret					; Retorna pra origem da chamada
+	ld (nuvem02H),a		; Coloca o valor de A em nuvem02H
+	ret			; Retorna pra origem da chamada
 
 reset_nuvem01:			
-		ld a,240-8			; Carrega 240 em A (fim da tela)
-            	ld (nuvem01H),a	; Coloca A em nuvem01H, resetando a posição
-            	ret					; Retorna pra origem da chamada
+	ld a,240-8		; Carrega 240 em A (fim da tela)
+	ld (nuvem01H),a		; Coloca A em nuvem01H, resetando a posição
+	ret			; Retorna pra origem da chamada
 
 reset_nuvem02:
-		ld a,240-8			; Carrega 240 em A (fim da tela)
-            	ld (nuvem02H),a	; Coloca A em nuvem01H, resetando a posição
-            	ret					; Retorna pra origem da chamada
+	ld a,240-8		; Carrega 240 em A (fim da tela)
+	ld (nuvem02H),a		; Coloca A em nuvem01H, resetando a posição
+	ret			; Retorna pra origem da chamada
 
 espera_nuvem:     
-		NOP				; Nao executa nada por um ciclo
-            	DEC BC 			; Decrementa o valor do contador BC
-		LD A,C			; Carrega o valor de A em C
-		OR B 			; A = C OR B
-		JR NZ,espera_nuvem	; Se A = zero termina o loop
-           	ret				; Retorna para a origem da chamada            
-
+	NOP			; Nao executa nada por um ciclo
+	DEC BC 			; Decrementa o valor do contador BC
+	LD A,C			; Carrega o valor de A em C
+	OR B 			; A = C OR B
+	JR NZ,espera_nuvem	; Se A = zero termina o loop
+	ret			; Retorna para a origem da chamada            
             
 checa_cursor:
         call GTSTCK  		; Chama a rotina de checagem do cursor  
@@ -418,11 +411,14 @@ cursor_esquerda:
         jr nz,cursor_direita	; se a nao for 1 pula para proxima
         push af			; salva AF na pilha
         ld a,(aviaoV)		; carrega valor de aviaoV em A
+        cp 6			; Limita posicao do aviao antes da borda superior
+        jp z,sai_cursor_esquerda
         add a,-1		; decresce A        
         ld (aviaoV),a		; Retorna valor de A para aviaoV
         ld a,(status_aviao)	; 
         cp 1			;
         call nz, mostra_aviao_subindo        
+sai_cursor_esquerda:        
         pop af			; retorna AF da pilha
         ret			; retorna para origem da chamada
 
@@ -431,22 +427,23 @@ cursor_direita:
         jr nz,sai_loop
         push af
         ld a,(aviaoV)
+        cp 118			; Limita posicao do avian antes da borda inferior
+        jp z,sai_cursor_direita
         INC a
         ld (aviaoV),a
         ld a,(status_aviao)
         cp 1
         call nz,mostra_aviao_descendo
+sai_cursor_direita
         pop af
         ret
         
 sai_loop:
 	ld a,(status_aviao)
-        cp 0
+        cp 1
 	jr z,reset_status
         cp a
-        jp m,add_status
-        jp sub_status
-		ret
+	ret
 
 reset_status:
 	ld a,0
@@ -454,26 +451,9 @@ reset_status:
 	call mostra_aviao
         RET
 
-add_status:
-	push af
-	ld a,(status_aviao)
-        add a,1
-        ld (status_aviao),a
-        POP AF        
-        RET
-
-sub_status:
-	PUSH AF
-        ld a,(status_aviao)
-        ld a,0
-        add a,-1
-        ld (status_aviao),a
-        POP AF
-        ret
-
 desenha_borda:     
-; primeira seçao da tela
-        ld hl,frame_supesq_01a; carrega o padrao do desenho da borda
+				; primeira seçao da tela
+        ld hl,frame_supesq_01a	; carrega o padrao do desenho da borda
             			; superior esquerda. Vamos carregar 1 bloco
         ld bc,8			; de 8x8 e colocar na VRAM na posicao do
         ld de,$0008		; Slot 1 da tabela de padroes do 1o 1/3 da tela
@@ -514,26 +494,26 @@ desenha_borda:
         ld de,$1020		; slot 4 da tabela de padroes do 2o 1/3 da tela
         call LDIRVM		; Envia pra VRAM
             
-        ld hl,frame_supdir_01a; carrega a primeira parte da borda
-            				; superior direita
+        ld hl,frame_supdir_01a	; carrega a primeira parte da borda
+            			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$0028		; slot 4 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; envia pra VRAM
             
-        ld hl,frame_supdir_01b; carrega a primeira parte da borda
-            				; superior direita
+        ld hl,frame_supdir_01b	; carrega a primeira parte da borda
+            			; superior direita
         ld bc,8			; bloco de 8x8
         ld de,$1028		; slot 4 da tabela de padroes do 2o 1/3 da tela
         call LDIRVM		; envia pra VRAM
             
         ld hl,frame_supdir_01b; carrega a segunda parte da borda
-            				; superior direita
+            			; superior direita
         ld bc,8			; 1 blocos de 8x8
         ld de,$0030		; slot 4 da tabela de padroes do 1o 1/3 da tela
         call LDIRVM		; envia para VRAM
             
         ld hl,frame_supdir_01b; carrega a segunda parte da borda
-            				; superior direita
+            			; superior direita
         ld bc,8			; 1 blocos de 8x8
         ld de,$1030		; slot 4 da tabela de padroes do 2o 1/3 da tela
         call LDIRVM		; envia para VRAM
@@ -685,7 +665,7 @@ desenha_borda:
         ld (preenche),hl 	; Aponta preenche para mapa_laterais_secao1 <- MUITO IMPORTANTE
         call desenha_laterais_secao
 
-        ; Segunda seçao da tela  
+        			; Segunda seçao da tela  
         ld hl,mapa_borda_superior ; Mapeia na tela a posicao de cada
         			; tile nas duas linhas superiores da tela
         ld bc,64		; 32 blocos de tiles por linha = 2 linhas
@@ -1175,8 +1155,8 @@ desenha_pista_08_loop:
             ret     
 
 espera:
-			PUSH BC			; Salva BC na pilha
-            LD BC,$008f		; Executa NOP por 1535 vezes
+	PUSH BC		; Salva BC na pilha
+	LD BC,$008f	; Executa NOP por 1535 vezes
 espera_loop
 	NOP		; Nao executa nada por um ciclo
 	DEC BC 		; Decrementa o valor do contador BC
@@ -1230,18 +1210,18 @@ mapa_sol_02:
 	db 18,19
             
 mapa_borda_superior:
-            DB 1,2,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,5,6
-            DB 7,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,10   
+	DB 1,2,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,3,4,5,6
+	DB 7,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,9,10   
 
 mapa_borda_inferior:
-            DB 11,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,16 
-            DB 17,18,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,19,20
+	DB 11,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15,16 
+	DB 17,18,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,13,14,19,20
 
 mapa_laterais_secao1:
-            DB 14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15
+	DB 14,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,15
             
 mapa_laterais_secao2:
-            DB 21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22
+	DB 21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22
             
 
 nuvem01_pattern:
@@ -1400,11 +1380,11 @@ message:
 pista_scroll:	
 		db $0
 status_aviao:	
-		db $0
+		db 0
 aviaoH:	
-		dw $05	; Posicao horizontal do sprite do aviao
+		db 0	; Posicao horizontal do sprite do aviao
 aviaoV: 	
-		dw $05  ; posicao vertical do sprite do aviao
+		db 0  ; posicao vertical do sprite do aviao
 nuvem01H:      
 		db $10	; posisao horizontal do sprite da nuvem01
 nuvem02H:      
