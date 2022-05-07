@@ -426,7 +426,7 @@ sai_loop:
 	ret
     
 incrementa_status:
-	ld hl,1
+	ld hl,2
 	add a,(hl)
 	ld (status_aviao),a
 	cp 0
