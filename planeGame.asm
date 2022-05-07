@@ -2,7 +2,7 @@ CHGMOD:		equ 0x005F	; Chamada da BIOS para mudança do modo gráfico
 CHPUT:		equ 0x00a2	; Coloca um caracter na tela em modo texto
 CHGET:		equ 0x009F	; Aguarda uma tecla ser precionada
 LDIRVM: 	equ 0x005C	; Transfere um bloco de tamanho BC do endereço em 
-						; DE na RAM para o endereço em HL na VRAM
+				; DE na RAM para o endereço em HL na VRAM
 FORCLR:		equ 0xF3E9	; Variavel de systema referente a cor da fonte
 BAKCLR:		equ 0xF3EA	; Variavel de systema referente a cor do fundo
 BDRCLR:		equ 0xF3EB	; Variavel de systema referente a cor da borda
@@ -26,7 +26,8 @@ POSIT:		equ 0x00C6	; Move o cursor para um posicao definida por HL
 FILVRM:		equ 0x0056	; Preenche BC blocos no endereço HL da VRAM
 				; com os dados definidos em A
 CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
-
+CSRY:		equ 0xF3DC	;1	Current row-position of the cursor
+CSRX:		equ 0xF3DD	;1	Current column-position of the cursor
 
 
 
@@ -77,6 +78,7 @@ mainLoop:
         call mostra_aviao
         call mostra_nuvens
         call mostra_sol
+        ;call mostra_score
        	call movimenta_loop
         ;call CHGET
         ret
@@ -152,51 +154,6 @@ inicia_attributos_aviao:
         call movimenta_aviao	; Chama rotina para desenho do aviao
         
         ret
-
-mostra_aviao_descendo:
-	ld hl,aviao2a_pattern; Carrega em HL o endereço do padrao do 
-            			; sprite do avião
-	ld bc,32		; Carrega em B a quantidade de blocos a
-            			; serem enviados pra VRAM
-	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
-            			; para a tabela de sprites (0x3800)
-	call LDIRVM		; Envia B blocos do endereço HL da RAM
-            			; para o endereço DE da VRAM
-	ld hl,aviao2b_pattern	; Carrega em HL o endereço do padrao do 
-            			; sprite do avião
-	ld bc,32		; Carrega em B a quantidade de blocos a
-            			; serem enviados pra VRAM
-	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
-            			; para a tabela de sprites (0x3800)
-	call LDIRVM		; Envia B blocos do endereço HL da RAM
-            			; para o endereço DE da VRAM
-	ld a,(status_aviao)
-	add a,1
-	ld (status_aviao),a
-	ret			; Volta para a origem da chamada
-
-
-mostra_aviao_subindo:
-	ld hl,aviao3a_pattern	; Carrega em HL o endereço do padrao do 
-				; sprite do avião
-	ld bc,32		; Carrega em B a quantidade de blocos a
-				; serem enviados pra VRAM
-	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
-				; para a tabela de sprites (0x3800)
-	call LDIRVM		; Envia B blocos do endereço HL da RAM
-				; para o endereço DE da VRAM
-	ld hl,aviao3b_pattern	; Carrega em HL o endereço do padrao do 
-				; sprite do avião
-	ld bc,32		; Carrega em B a quantidade de blocos a
-				; serem enviados pra VRAM
-	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
-				; para a tabela de sprites (0x3800)
-	call LDIRVM		; Envia B blocos do endereço HL da RAM
-				; para o endereço DE da VRAM
-	ld a,(status_aviao)
-	add a,1
-	ld (status_aviao),a
-	ret			; Volta para a origem da chamada
             
 mostra_nuvens:
 	ld hl,nuvem01_pattern 	; Carrega o endereço do padrao da 
@@ -293,7 +250,7 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
 	call checa_cursor	; rotina para checar as teclas de cursor
 	ld a,1			; 1 = Joystick na porta 1
 	call checa_cursor	; rotina para checar as teclas de cursor
-	call movimenta_aviao	; Rotina da movimentacao do aviao
+	; movimenta_aviao	; Rotina da movimentacao do aviao
 	call movimenta_nuvem	; Rotina da movimentacao das nuvens
 	;call desenha_pista
 	ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
@@ -302,30 +259,6 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
 	jp movimenta_loop	; retorna pro inicio do loop
            			            
 movimenta_aviao:
-
-        ;ld a,(aviaoV)
-
-        ;cp 4
-        ;jp z,lim_aviao_cim
-
-        ;cp 120
-        ;jp z,lim_aviao_bai
-
-        ;ld (aviaoV),a
-
-        ;ld a,(aviaoH)
-
-        ;cp 8
-        ;jp z,lim_aviao_esq
-
-        ;cp 232			; Compara A com 240 (fim da tela)           
-        ;jp z,lim_aviao_dir	; Se A = 240, chama rotina de reset do 
-        			; valor de aviaoH. Util para quanto
-        			; quisermos limitar a janela de movimento
-
-        ;ld (aviaoH),A		; Coloca o valor de A em aviaoH
-        
-        ;ld (aviaoV),a
 	ld hl,SPR_ATT
         ld a,(aviaoV)
         call WRTVRM
@@ -346,15 +279,51 @@ movimenta_aviao:
 
         ret		; retorna pra origem da chamada
 
-lim_aviao_esq:
-	ld a,10
-	ld (aviaoH),a
-	ret
-            
-lim_aviao_dir:
-	ld a,230	; Coloca 0 em A 	
-	ld (aviaoH),a	; Coloca A em aviaoH, resetando a posição
-	ret		; retorna pra origem da chamada
+mostra_aviao_subindo:
+	ld hl,aviao3a_pattern	; Carrega em HL o endereço do padrao do 
+				; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+				; serem enviados pra VRAM
+	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
+				; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+				; para o endereço DE da VRAM
+	ld hl,aviao3b_pattern	; Carrega em HL o endereço do padrao do 
+				; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+				; serem enviados pra VRAM
+	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
+				; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+				; para o endereço DE da VRAM
+	ld a,(status_aviao)
+	add a,1
+	ld (status_aviao),a
+
+	ret			; Volta para a origem da chamada
+        
+mostra_aviao_descendo:
+	ld hl,aviao2a_pattern; Carrega em HL o endereço do padrao do 
+            			; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+            			; serem enviados pra VRAM
+	ld de,SPR_PAT		; Carrega em DE a posiçao inicial da VRAM
+            			; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM
+	ld hl,aviao2b_pattern	; Carrega em HL o endereço do padrao do 
+            			; sprite do avião
+	ld bc,32		; Carrega em B a quantidade de blocos a
+            			; serem enviados pra VRAM
+	ld de,SPR_PAT+32	; Carrega em DE a posiçao inicial da VRAM
+            			; para a tabela de sprites (0x3800)
+	call LDIRVM		; Envia B blocos do endereço HL da RAM
+            			; para o endereço DE da VRAM
+	ld a,(status_aviao)
+	sub a,1
+	ld (status_aviao),a
+
+	ret			; Volta para a origem da chamada
 
 movimenta_nuvem:
 	ld hl,SPR_ATT+9		; Coloca em HL a posicao da tabela de 	
@@ -410,47 +379,94 @@ cursor_esquerda:
         cp 7			; a = 1 - tecla para cima
         jr nz,cursor_direita	; se a nao for 1 pula para proxima
         push af			; salva AF na pilha
-        ld a,(aviaoV)		; carrega valor de aviaoV em A
+        ld a,(aviaoV)	; carrega valor de aviaoV em A
         cp 6			; Limita posicao do aviao antes da borda superior
         jp z,sai_cursor_esquerda
-        add a,-1		; decresce A        
-        ld (aviaoV),a		; Retorna valor de A para aviaoV
-        ld a,(status_aviao)	; 
-        cp 1			;
-        call nz, mostra_aviao_subindo        
+        add a,-2		; decresce A        
+        ld (aviaoV),a	; Retorna valor de A para aviaoV
+        call mostra_aviao_subindo 
+        call movimenta_aviao
+        ;ld a,(status_aviao)
+        ;ld hl,20
+        ;add a,(hl)
+        ld a,2
+        ld (status_aviao),a
+        
 sai_cursor_esquerda:        
         pop af			; retorna AF da pilha
-        ret			; retorna para origem da chamada
+        jr sai_loop
 
 cursor_direita:
         cp 3
         jr nz,sai_loop
         push af
         ld a,(aviaoV)
-        cp 118			; Limita posicao do avian antes da borda inferior
+        cp 118			; Limita posicao do aviao antes da borda inferior
         jp z,sai_cursor_direita
-        INC a
+        add a,2
         ld (aviaoV),a
-        ld a,(status_aviao)
-        cp 1
-        call nz,mostra_aviao_descendo
-sai_cursor_direita
+        call mostra_aviao_descendo
+        call movimenta_aviao
+        ;ld a,(status_aviao)
+        ;ld hl,1
+        ;sub (hl)
+        ld a,-2
+        ld (status_aviao),a
+        
+sai_cursor_direita:
         pop af
-        ret
+        jr sai_loop
         
 sai_loop:
 	ld a,(status_aviao)
-        cp 1
+	cp 0
+	jr C,incrementa_status
 	jr z,reset_status
-        cp a
+        jr nz,decrementa_status
+	ret
+    
+incrementa_status:
+	ld hl,1
+	add a,(hl)
+	ld (status_aviao),a
+	cp 0
+	jr z,reset_status
 	ret
 
+decrementa_status:
+	ld hl,2
+	sub (hl)
+	ld (status_aviao),a
+	;cp 0
+	;jr z,reset_status
+        ret
+
 reset_status:
-	;ld a,0
-        dec a
-        ld (status_aviao),a
 	call mostra_aviao
-        RET
+    	ret
+        
+mostra_score:
+        ;ld hl,CSRY
+        ;ld (hl),5
+        ;ld hl,CSRX
+        ;ld (hl),10
+        ;call POSIT
+        ;ld a,(status_aviao)
+        ;cp 0
+        ;jr nz,exit_mostra_score
+        ld hl,score_message
+score_loop
+	ld a,(hl)
+	cp 0
+        ret z
+        call GRPPRT
+        inc hl
+        jp score_loop
+exit_mostra_score:
+        ret
+
+score_message:
+	db "Score",0
 
 desenha_borda:     
 				; primeira seçao da tela
@@ -1158,7 +1174,8 @@ desenha_pista_08_loop:
 espera:
 	PUSH BC		; Salva BC na pilha
 	LD BC,$008f	; Executa NOP por 1535 vezes
-espera_loop
+        
+espera_loop:
 	NOP		; Nao executa nada por um ciclo
 	DEC BC 		; Decrementa o valor do contador BC
 	LD A,C		; Carrega o valor de A em C
@@ -1313,7 +1330,7 @@ frame_infdir_02b:
 frame_superior_01a:
             	DB $FE,$C3,$18,$FF,$4A,$BB,$A4,$FF
             
-frame_superior_01b
+frame_superior_01b:
             	DB $7F,$C3,$18,$FF,$4A,$BB,$A4,$FF
             
 frame_direito_01:
