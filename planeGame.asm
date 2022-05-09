@@ -78,7 +78,7 @@ mainLoop:
         call mostra_aviao
         call mostra_nuvens
         call mostra_sol
-        ;call mostra_score
+        call mostra_score
        	call movimenta_loop
         ;call CHGET
         ret
@@ -446,27 +446,42 @@ reset_status:
     	ret
         
 mostra_score:
-        ;ld hl,CSRY
-        ;ld (hl),5
-        ;ld hl,CSRX
-        ;ld (hl),10
-        ;call POSIT
-        ;ld a,(status_aviao)
-        ;cp 0
-        ;jr nz,exit_mostra_score
-        ld hl,score_message
-score_loop
-	ld a,(hl)
-	cp 0
-        ret z
-        call GRPPRT
-        inc hl
-        jp score_loop
-exit_mostra_score:
-        ret
+	ld hl,letras_sc
+        ld bc,32
+        ld de,$1000+(8*23) ; slot 23 a 26 da tabela de padroes 3o 1/3 da tela
+        call LDIRVM
+        ld a,$17
+        ld bc,32
+        ld hl,$3000+(8*23)
+        call FILVRM
+        
+        ld hl,letras_or
+        ld bc,32
+        ld de,$1000+(8*27) ; slot 27 a 30 da tabela de padroes 3o 1/3 da tela
+        call LDIRVM
+        ld a,$17
+        ld bc,32
+        ld hl,$3000+(8*27)
+        call FILVRM
 
-score_message:
-	db "Score",0
+        ld hl,letras_ecolon
+        ld bc,32
+        ld de,$1000+(8*31) ; slot 31 a 34 da tabela de padroes 3o 1/3 da tela
+        call LDIRVM
+        ld a,$17
+        ld bc,32
+        ld hl,$3000+(8*31)
+        call FILVRM
+        
+        ld hl,mapa_score_cima
+        ld de,$1a00+(8*16+2)
+        ld bc,6
+        call LDIRVM
+        ld hl,mapa_score_baixo
+        ld de,$1a00+(8*20+2)
+        ld bc,6
+        call LDIRVM
+        ret
 
 desenha_borda:     
 				; primeira seçao da tela
@@ -1240,6 +1255,11 @@ mapa_laterais_secao1:
             
 mapa_laterais_secao2:
 	DB 21,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22
+
+mapa_score_cima:
+	DB 23,25,27,29,31,33
+mapa_score_baixo:
+	DB 24,26,28,30,32,34
             
 
 nuvem01_pattern:
@@ -1387,6 +1407,28 @@ pista_08b:
 pista_pattern:
 		DB $07,$07,$1e,$1e,$bc,$bc,$bc,$bc
                 DB $07,$07,$1e,$1e,$bc,$bc,$bc,$bc
+                
+letras_AB:
+                DB $00,$0C,$1E,$12,$13,$13,$33,$73
+                DB $73,$7F,$73,$73,$73,$73,$73,$00
+                DB $00,$1C,$12,$12,$12,$1C,$32,$73
+                DB $73,$73,$73,$73,$73,$73,$7E,$00
+letras_SC:
+                DB $00,$1C,$36,$62,$60,$30,$18,$0C
+                DB $26,$66,$C6,$C6,$E6,$6C,$38,$00
+                DB $00,$3C,$76,$66,$62,$C0,$C0,$C0
+                DB $C0,$C0,$C0,$62,$66,$76,$3C,$00
+letras_OR:
+                DB $00,$08,$1C,$36,$36,$77,$77,$63
+                DB $63,$77,$77,$36,$36,$1C,$08,$00
+                DB $00,$5C,$7E,$37,$23,$21,$23,$36
+                DB $3C,$6E,$66,$66,$66,$63,$63,$00
+letras_ecolon:
+                DB $00,$1E,$3B,$33,$21,$60,$71,$7F
+                DB $7F,$71,$60,$21,$33,$3B,$1E,$00
+                DB $00,$08,$18,$3C,$3C,$18,$10,$00
+                DB $08,$18,$3C,$3C,$18,$10,$00,$00
+
             
 ; Usado pela rotina Sprites_On         
 VDP:        	DS 28,0
