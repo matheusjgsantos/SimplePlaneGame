@@ -28,7 +28,8 @@ FILVRM:		equ 0x0056	; Preenche BC blocos no endereço HL da VRAM
 CHGSND:		equ 0x0135	; liga ou desliga clock do teclado
 CSRY:		equ 0xF3DC	;1	Current row-position of the cursor
 CSRX:		equ 0xF3DD	;1	Current column-position of the cursor
-
+JIFFY:		equ 0xFC9E	;Jiffy armazena o timer do sistema e incrementa 
+				;a cada refresh da tela 
 
 
 
@@ -72,7 +73,7 @@ start:
     
 mainLoop:
         call reset_tabela_nomes
-        call desenha_borda; chama  rotina de desenho da borda	
+	call desenha_borda; chama  rotina de desenho da borda	
         ;call desenha_pista
         call inicia_attributos_aviao
         call mostra_aviao
@@ -251,9 +252,9 @@ movimenta_loop:			; Esse é o loop que cuida da movimentação
 	ld a,1			; 1 = Joystick na porta 1
 	call checa_cursor	; rotina para checar as teclas de cursor
 	; movimenta_aviao	; Rotina da movimentacao do aviao
-	call movimenta_nuvem	; Rotina da movimentacao das nuvens
+	;call movimenta_nuvem	; Rotina da movimentacao das nuvens
 	;call desenha_pista
-	ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
+	;ld bc,$0500		; Carrega em BC o valor para rodina que									; gera um delay no movimento, caso contrario
 				; tudo se move muito rapido
 	call espera_nuvem	; Rotina de delay
 	jp movimenta_loop	; retorna pro inicio do loop
@@ -349,6 +350,10 @@ movimenta_nuvem:
             			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
 	ld (nuvem02H),a		; Coloca o valor de A em nuvem02H
+        
+        ;ld a,0
+        ;ld (JIFFY),a
+        
 	ret			; Retorna pra origem da chamada
 
 reset_nuvem01:			
@@ -361,13 +366,42 @@ reset_nuvem02:
 	ld (nuvem02H),a		; Coloca A em nuvem01H, resetando a posição
 	ret			; Retorna pra origem da chamada
 
-espera_nuvem:     
-	NOP			; Nao executa nada por um ciclo
-	DEC BC 			; Decrementa o valor do contador BC
-	LD A,C			; Carrega o valor de A em C
-	OR B 			; A = C OR B
-	JR NZ,espera_nuvem	; Se A = zero termina o loop
-	ret			; Retorna para a origem da chamada            
+espera_nuvem:
+	;NOP			; Nao executa nada por um ciclo
+	;DEC BC 			; Decrementa o valor do contador BC
+	;LD A,C			; Carrega o valor de A em C
+	;OR B 			; A = C OR B
+	;JR NZ,espera_nuvem	; Se A = zero termina o loop
+        ;push bc
+        ;ld b,$F
+        ;ld c,0
+;espera_nuvem_loop:
+        ld hl,(JIFFY)
+;        cp c
+	ld a,l
+	cp $10
+        jp z,movimenta_nuvem
+        cp $30
+        jp z,movimenta_nuvem
+        cp $50
+        jp z,movimenta_nuvem
+        cp $70
+        jp z,movimenta_nuvem
+        cp $90
+        jp z,movimenta_nuvem
+        cp $a0
+        jp z,movimenta_nuvem
+        cp $c0
+        jp z,movimenta_nuvem
+        cp $f0
+        jp z,movimenta_nuvem
+;        ld a,$10
+;        add c
+;        ld c,a
+;        djnz espera_nuvem_loop
+;	pop bc
+	ret			; Retorna para a origem da chamada  
+
             
 checa_cursor:
         call GTSTCK  		; Chama a rotina de checagem do cursor  
@@ -450,28 +484,52 @@ mostra_score:
         ld bc,32
         ld de,$1000+(8*23) ; slot 23 a 26 da tabela de padroes 3o 1/3 da tela
         call LDIRVM
-        ld a,$17
-        ld bc,32
-        ld hl,$3000+(8*23)
-        call FILVRM
+        ;ld a,$E7
+        ;ld bc,16
+        ;ld hl,$3000+(8*23)
+        ;call FILVRM
+        ld hl,score_cores
+        ld bc,16
+        ld de,$3000+(8*23)
+        call LDIRVM
+        ld de,$3000+(8*25)
+        ld hl,score_cores
+        ld bc,16
+        call LDIRVM
         
         ld hl,letras_or
         ld bc,32
         ld de,$1000+(8*27) ; slot 27 a 30 da tabela de padroes 3o 1/3 da tela
         call LDIRVM
-        ld a,$17
-        ld bc,32
-        ld hl,$3000+(8*27)
-        call FILVRM
+        ;ld a,$17
+        ;ld bc,32
+        ;ld hl,$3000+(8*27)
+        ;call FILVRM
+        ld hl,score_cores
+        ld bc,16
+        ld de,$3000+(8*27)
+        call LDIRVM
+        ld de,$3000+(8*29)
+        ld hl,score_cores
+        ld bc,16
+        call LDIRVM
 
         ld hl,letras_ecolon
         ld bc,32
         ld de,$1000+(8*31) ; slot 31 a 34 da tabela de padroes 3o 1/3 da tela
         call LDIRVM
-        ld a,$17
-        ld bc,32
-        ld hl,$3000+(8*31)
-        call FILVRM
+        ;ld a,$17
+        ;ld bc,32
+        ;ld hl,$3000+(8*31)
+        ;call FILVRM
+        ld hl,score_cores
+        ld bc,16
+        ld de,$3000+(8*31)
+        call LDIRVM
+        ld de,$3000+(8*33)
+        ld hl,score_cores
+        ld bc,16
+        call LDIRVM
         
         ld hl,mapa_score_cima
         ld de,$1a00+(8*16+2)
@@ -482,6 +540,10 @@ mostra_score:
         ld bc,6
         call LDIRVM
         ret
+score_cores:
+	db $01,$e1,$e1,$71,$71,$51,$51,$41
+        db $41,$51,$51,$71,$71,$e1,$e1,$01
+	
 
 desenha_borda:     
 				; primeira seçao da tela
@@ -1419,13 +1481,13 @@ letras_SC:
                 DB $00,$3C,$76,$66,$62,$C0,$C0,$C0
                 DB $C0,$C0,$C0,$62,$66,$76,$3C,$00
 letras_OR:
-                DB $00,$08,$1C,$36,$36,$77,$77,$63
-                DB $63,$77,$77,$36,$36,$1C,$08,$00
+                DB $00,$18,$3C,$76,$66,$E3,$E3,$C3
+                DB $C3,$C7,$C7,$66,$6E,$3C,$18,$00
                 DB $00,$5C,$7E,$37,$23,$21,$23,$36
                 DB $3C,$6E,$66,$66,$66,$63,$63,$00
 letras_ecolon:
-                DB $00,$1E,$3B,$33,$21,$60,$71,$7F
-                DB $7F,$71,$60,$21,$33,$3B,$1E,$00
+                DB $00,$1E,$3B,$31,$60,$61,$73,$7F
+                DB $73,$61,$60,$61,$33,$3B,$1E,$00
                 DB $00,$08,$18,$3C,$3C,$18,$10,$00
                 DB $08,$18,$3C,$3C,$18,$10,$00,$00
 
