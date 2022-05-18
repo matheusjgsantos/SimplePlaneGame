@@ -30,6 +30,7 @@ CSRY:		equ 0xF3DC	;1	Current row-position of the cursor
 CSRX:		equ 0xF3DD	;1	Current column-position of the cursor
 JIFFY:		equ 0xFC9E	;Jiffy armazena o timer do sistema e incrementa 
 				;a cada refresh da tela 
+INTCNT:		equ 0xFCA2	; Contador do INTERVAL
 
 
 
@@ -160,7 +161,7 @@ mostra_nuvens:
 	ld hl,nuvem01_pattern 	; Carrega o endereço do padrao da 
             			; nuvem01 em HL
 	ld bc,32		; Numero de blocos a serem copiados pra VRAM
-	ld de,SPR_PAT+64	; Coloca em DE a posicao inicial da tabela
+	ld de,SPR_PAT+(32*2)	; Coloca em DE a posicao inicial da tabela
             			; de sprites da VRAM + um offset de 32 bytes
                                 ; para copia dos dados do sprite 1
 	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
@@ -172,31 +173,50 @@ mostra_nuvens:
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-	ld de,SPR_ATT+8		; Carrega em DE a posicao iniciao da VRAM
+	ld de,SPR_ATT+(4*2)	; Carrega em DE a posicao iniciao da VRAM
             			; para a tabela de padroes + offset de 4 
                                 ; bytes para o sprite 1
 	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
             			; para posicao DE da VRAM
-	ld hl,nuvem02_pattern 	; Carrega o endereço do padrao da 
+	ld hl,nuvem01b_pattern 	; Carrega o endereço do padrao da 
             			; nuvem01 em HL
 	ld bc,32		; Numero de blocos a serem copiados pra VRAM
-	ld de,SPR_PAT+96	; Coloca em DE a posicao inicial da tabela
+	ld de,SPR_PAT+(32*3)	; Coloca em DE a posicao inicial da tabela
             			; de sprites da VRAM + um offset de 64 bytes
                                 ; para copia dos dados do sprite 2
 	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
             			; para posicao DE da VRAM
-	ld hl,nuvem02_attrib 	; Carrega o endereço do attributo da 
+	ld hl,nuvem01b_attrib 	; Carrega o endereço do attributo da 
             			; nuvem01 em HL
 	ld bc,4			; Os atributos de sprite sao sempre 4 bytes:
             			; Byte 0: Coordenada vertical
                                 ; Byte 1: Coordenada horizontal
                                 ; Byte 3: Numero do sprite
                                 ; Byte 4: Cor do Sprite (MSX1)
-	ld de,SPR_ATT+12	; Carrega em DE a posicao iniciao da VRAM
+	ld de,SPR_ATT+(4*3)	; Carrega em DE a posicao iniciao da VRAM
             			; para a tabela de padroes + offset de 8 
                                 ; bytes para o sprite 2
 	call LDIRVM		; Transfere BC blocos da posicao HL da RAM
             			; para posicao DE da VRAM
+                                
+        ld hl,nuvem02_pattern
+        ld bc,32
+        ld de,SPR_PAT+(32*4)
+        call LDIRVM
+        ld hl,nuvem02_attrib
+        ld bc,4
+        ld de,SPR_ATT+(4*4)
+        call LDIRVM
+        
+        ld hl,nuvem03_pattern
+        ld bc,32
+        ld de,SPR_PAT+(32*5)
+        call LDIRVM
+        ld hl,nuvem03_attrib
+        ld bc,4
+        ld de,SPR_ATT+(4*5)
+        CALL LDIRVM
+        
 	ret			; retorna para a origem da chamada
             
 mostra_sol:
@@ -327,18 +347,23 @@ mostra_aviao_descendo:
 	ret			; Volta para a origem da chamada
 
 movimenta_nuvem:
-	ld hl,SPR_ATT+9		; Coloca em HL a posicao da tabela de 	
+	ld hl,SPR_ATT+(4*2+1)	; Coloca em HL a posicao da tabela de 	
             			; atributo de sprite + 5, que define a 
                                 ; movimentacao horizontal do sprite 1
 	ld a,(nuvem01H)		; carrega o valor definido em nuvem01H em A
 	call WRTVRM		; Coloca na posical HL da VRAM o valor de A
+        ld hl,SPR_ATT+(4*3+1)
+        push af
+        add 16
+        call WRTVRM
+        pop af
 	DEC A			; Decrementa A
 	cp 8			; Compara A com 0 (inicio da tela)
 	jp z,reset_nuvem01	; Se A = 0,chama rotina de reset do
             			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
 	ld (nuvem01H),a		; Coloca o valor de A em nuvem01H
-	ld hl,SPR_ATT+13	; Coloca em HL a posicao da tabela de 	
+	ld hl,SPR_ATT+(4*4+1)	; Coloca em HL a posicao da tabela de 	
           			; atributo de sprite + 9, que define a 
                                 ; movimentacao horizontal do sprite 2
 	ld a,(nuvem02H)		; carrega o valor definido em nuvem02H em A
@@ -350,6 +375,13 @@ movimenta_nuvem:
             			; valor de nuvem_h para posicionar o sprite
                                 ; no lado direito da tela
 	ld (nuvem02H),a		; Coloca o valor de A em nuvem02H
+        ld a,(nuvem03H)
+        ld hl,SPR_ATT+(4*5+1)
+        call WRTVRM
+        sub 1
+        cp 8
+        jp z,reset_nuvem03
+        ld (nuvem03H),a
         
         ;ld a,0
         ;ld (JIFFY),a
@@ -365,6 +397,11 @@ reset_nuvem02:
 	ld a,240-8		; Carrega 240 em A (fim da tela)
 	ld (nuvem02H),a		; Coloca A em nuvem01H, resetando a posição
 	ret			; Retorna pra origem da chamada
+        
+reset_nuvem03:
+	ld a,240-8		; Carrega 240 em A (fim da tela)
+	ld (nuvem03H),a		; Coloca A em nuvem01H, resetando a posição
+	ret			; Retorna pra origem da chamada
 
 espera_nuvem:
 	;NOP			; Nao executa nada por um ciclo
@@ -377,29 +414,16 @@ espera_nuvem:
         ;ld c,0
 ;espera_nuvem_loop:
         ld hl,(JIFFY)
-;        cp c
-	ld a,l
-	cp $10
-        jp z,movimenta_nuvem
-        cp $30
-        jp z,movimenta_nuvem
-        cp $50
-        jp z,movimenta_nuvem
-        cp $70
-        jp z,movimenta_nuvem
-        cp $90
-        jp z,movimenta_nuvem
-        cp $a0
-        jp z,movimenta_nuvem
-        cp $c0
-        jp z,movimenta_nuvem
-        cp $f0
-        jp z,movimenta_nuvem
-;        ld a,$10
-;        add c
-;        ld c,a
-;        djnz espera_nuvem_loop
-;	pop bc
+        ld a,l
+        and $f0
+        ld (target),a
+        cp l
+        ret nz
+        jp movimenta_nuvem
+        ld a,(target)
+        add $10
+        ld (target),a;
+
 	ret			; Retorna para a origem da chamada  
 
             
@@ -1325,29 +1349,40 @@ mapa_score_baixo:
             
 
 nuvem01_pattern:
-; color 15
-              DB $00,$00,$00,$30,$79,$ED,$F7,$7F
-              DB $7F,$34,$00,$00,$00,$00,$00,$00
-              DB $00,$00,$30,$F8,$CE,$F7,$BF,$4E
-              DB $FC,$70,$00,$00,$00,$00,$00,$00
-; 
+              DB $00,$00,$00,$00,$00,$01,$00,$00
+              DB $0F,$7F,$1F,$00,$00,$00,$00,$00
+              DB $00,$00,$00,$02,$00,$00,$00,$41
+              DB $83,$FF,$CE,$00,$00,$00,$00,$00
+
+nuvem01b_pattern:              
+              DB $00,$00,$00,$00,$0C,$3E,$7F,$FF
+              DB $FF,$FF,$7F,$03,$00,$00,$00,$00
+              DB $00,$00,$00,$00,$00,$1C,$3E,$FF
+              DB $FF,$FF,$FE,$00,$00,$00,$00,$00
+              
 nuvem02_pattern:
-; color 15
-              DB $00,$00,$00,$00,$38,$ED,$F7,$7F
-              DB $7F,$35,$18,$0F,$03,$00,$00,$00
-              DB $00,$00,$00,$78,$CE,$F7,$BF,$4E
-              DB $FC,$4C,$F8,$80,$00,$00,$00,$00
+              DB $00,$00,$00,$00,$00,$00,$00,$03
+              DB $0F,$3F,$FF,$00,$00,$00,$00,$00
+              DB $00,$00,$00,$00,$00,$00,$F0,$F8
+              DB $F8,$FE,$FF,$00,$00,$00,$00,$00
+              
+nuvem03_pattern              
+              DB $00,$00,$00,$00,$00,$1F,$3F,$7F
+              DB $7F,$FF,$00,$00,$00,$00,$00,$00
+              DB $00,$00,$00,$00,$00,$00,$8C,$9E
+              DB $FE,$FF,$00,$00,$00,$00,$00,$00
+
 
 sol01a_pattern: 
-		DB $03,$0F,$1F,$3F,$7F,$7F,$FF,$FF
-		DB $C0,$F0,$F8,$FC,$FE,$FE,$FF,$FF          
+              DB $03,$0F,$1F,$3F,$7F,$7F,$FF,$FF
+              DB $C0,$F0,$F8,$FC,$FE,$FE,$FF,$FF          
 
 
 sol01b_pattern:
-		DB $FF,$FF,$7F,$7F,$3F,$1F,$0F,$03
-            	DB $FF,$FF,$FE,$FE,$FC,$F8,$F0,$C0 
+              DB $FF,$FF,$7F,$7F,$3F,$1F,$0F,$03
+              DB $FF,$FF,$FE,$FE,$FC,$F8,$F0,$C0 
             
-; Atributos inciais dos sprites: Horizontal, Vertical, Numero e Cor
+; Atributos inciais dos sprites: Vertical, Horizontal, Numero do sprite e Cor
 aviao1a_attrib:
 		DB $20,$08,$00,$04
 
@@ -1356,9 +1391,15 @@ aviao1b_attrib:
 
 nuvem01_attrib:
 		DB $10,$ff,$08,$0f
+                
+nuvem01b_attrib:
+		DB $11,$ff,$0c,$0f
 
 nuvem02_attrib:
-		DB $60,$30,$0C,$0f            
+		DB $40,$20,$0f,$0f
+
+nuvem03_attrib:
+		DB $76,$30,$13,$0f
 
 ; Tiles gerados no TinySprite do Jannone
 frame_supesq_01a:
@@ -1511,7 +1552,13 @@ nuvem01H:
 		db $10	; posisao horizontal do sprite da nuvem01
 nuvem02H:      
 		db $20	; posicao horizontal do sprite da nuvem02
+nuvem03H:
+		db $35  ; posicao horizontal fo sprite da nuvem03
 posicao:	
 		dw $00
 preenche:	
 		dw $00
+target:
+		db $00
+end:
+		db $0,1
